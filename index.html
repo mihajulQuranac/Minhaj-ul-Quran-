@@ -250,7 +250,55 @@
       </div>
     </div>
     <div class="copyright">© <span id="year"></span> Minhaj ul Quran Online Quran Academy. All rights reserved.</div>
-  </footer>
+  </footer><!-- Minhaj ul Quran AI ChatBot - FREE - with your number -->
+<style>
+#mq-chat-btn{position:fixed;bottom:20px;right:20px;background:#065f46;color:#fff;width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;cursor:pointer;z-index:9999;box-shadow:0 4px 15px rgba(0,0,0,0.3)}
+#mq-chat-box{position:fixed;bottom:90px;right:20px;width:320px;max-width:90vw;height:420px;background:#fff;border-radius:15px;box-shadow:0 5px 25px rgba(0,0,0,0.2);display:none;flex-direction:column;z-index:9999;overflow:hidden;font-family:sans-serif}
+#mq-chat-header{background:#065f46;color:#fff;padding:15px;font-weight:bold;display:flex;justify-content:space-between}
+#mq-chat-messages{flex:1;padding:15px;overflow-y:auto;font-size:14px}
+.mq-msg{margin:8px 0;padding:10px 12px;border-radius:12px;max-width:80%}
+.mq-bot{background:#f0fdf4;align-self:flex-start}
+.mq-user{background:#065f46;color:#fff;align-self:flex-end;margin-left:auto}
+#mq-chat-input{display:flex;border-top:1px solid #eee}
+#mq-chat-input input{flex:1;border:none;padding:12px;outline:none}
+#mq-chat-input button{background:#065f46;color:#fff;border:none;padding:0 18px;cursor:pointer}
+</style>
+
+<div id="mq-chat-btn" onclick="document.getElementById('mq-chat-box').style.display='flex'">💬</div>
+
+<div id="mq-chat-box">
+  <div id="mq-chat-header"><span>Minhaj ul Quran - Assistant</span><span onclick="this.parentElement.parentElement.style.display='none'" style="cursor:pointer">✕</span></div>
+  <div id="mq-chat-messages" style="display:flex;flex-direction:column">
+    <div class="mq-msg mq-bot">Assalamu Alaikum! 👋 Main Minhaj ul Quran ka assistant hun. Aapko kaunsa course chahiye?<br><br>1️⃣ Nazra Quran<br>2️⃣ Hifz<br>3️⃣ Tajweed<br>4️⃣ Fees / Timing</div>
+  </div>
+  <div id="mq-chat-input">
+    <input id="mq-input" placeholder="Yahan likhein..." onkeypress="if(event.key==='Enter')mqSend()">
+    <button onclick="mqSend()">Send</button>
+  </div>
+</div>
+
+<script>
+function mqSend(){
+  let inp=document.getElementById('mq-input');
+  let txt=inp.value.trim(); if(!txt)return;
+  let box=document.getElementById('mq-chat-messages');
+  box.innerHTML+=`<div class="mq-msg mq-user">${txt}</div>`;
+  inp.value='';
+  setTimeout(()=>{
+    let reply="JazakAllah! Aap 3 din ka FREE trial le sakte hain. Apna WhatsApp number bhej dein, hamare Qari sahab aapse rabta karenge. 😊";
+    let low=txt.toLowerCase();
+    if(low.includes('fees')||low.includes('price')||low.includes('qimat')||low.includes('fee')) reply="Fees: Pakistan ke liye 3000 PKR / mahina, USA/UK ke liye $30 / mahina. 3 Din Free Trial available hai!";
+    else if(low.includes('time')||low.includes('timing')||low.includes('waqt')) reply="Classes 24/7 available hain. Aap apni marzi ka time select kar sakte hain. Male/Female teacher dono available hain.";
+    else if(low.includes('1')||low.includes('nazra')) reply="Nazra Quran course mein bachon ko sahi makharij ke sath Quran parhna sikhaya jata hai. Age 4+ se shuru.";
+    else if(low.includes('2')||low.includes('hifz')) reply="Hifz course mein mukammal Quran hifz karwaya jata hai tajweed ke sath.";
+    else if(low.includes('3')||low.includes('tajweed')) reply="Tajweed course advanced qawaid ke liye hai.";
+    
+    box.innerHTML+=`<div class="mq-msg mq-bot">${reply}<br><br><a href="https://wa.me/923027445729?text=Assalamu Alaikum, I want Free Trial from Minhaj ul Quran website" target="_blank" style="background:#25D366;color:#fff;padding:6px 12px;border-radius:20px;text-decoration:none;display:inline-block;margin-top:5px">WhatsApp par baat karein</a></div>`;
+    box.scrollTop=box.scrollHeight;
+  },600);
+  box.scrollTop=box.scrollHeight;
+}
+</script>
 
   <script src="script.js"></script>
 </body>

@@ -15,6 +15,7 @@ document.querySelectorAll("#navMenu a").forEach(link => {
   });
 });
 
+
 // FAQ accordion
 document.querySelectorAll(".faq-question").forEach(button => {
   button.addEventListener("click", () => {
@@ -28,6 +29,7 @@ document.querySelectorAll(".faq-question").forEach(button => {
     }
   });
 });
+
 
 // Student / Teacher role selection
 function selectRole(role, button) {
@@ -47,8 +49,12 @@ function selectRole(role, button) {
   }
 }
 
-// Login form - Portal preview
+
+// Login form - Student / Teacher Dashboard
 const loginForm = document.getElementById("loginForm");
+const loginSection = document.getElementById("login");
+const studentDashboard = document.getElementById("studentDashboard");
+const logoutBtn = document.getElementById("logoutBtn");
 
 if (loginForm) {
   loginForm.addEventListener("submit", (event) => {
@@ -57,14 +63,69 @@ if (loginForm) {
     const role = document.getElementById("loginRole").value;
     const message = document.getElementById("loginMessage");
 
-    if (message) {
-      message.textContent =
-        `You selected ${role === "student" ? "Student" : "Teacher"} Login. ` +
-        "Real account login will be connected in the next step.";
-      message.classList.add("show");
+    // Student Login
+    if (role === "student") {
+
+      if (loginSection) {
+        loginSection.style.display = "none";
+      }
+
+      if (studentDashboard) {
+        studentDashboard.style.display = "block";
+
+        studentDashboard.scrollIntoView({
+          behavior: "smooth"
+        });
+      }
+
+      // Clear login form
+      loginForm.reset();
+
+      // Keep Student selected
+      const roleInput = document.getElementById("loginRole");
+
+      if (roleInput) {
+        roleInput.value = "student";
+      }
+
+    }
+
+    // Teacher Login
+    else {
+
+      if (message) {
+        message.textContent =
+          "Teacher Dashboard will be connected in the next step.";
+
+        message.classList.add("show");
+      }
+
     }
   });
 }
+
+
+// Student Dashboard Logout
+if (logoutBtn) {
+
+  logoutBtn.addEventListener("click", () => {
+
+    if (studentDashboard) {
+      studentDashboard.style.display = "none";
+    }
+
+    if (loginSection) {
+      loginSection.style.display = "block";
+
+      loginSection.scrollIntoView({
+        behavior: "smooth"
+      });
+    }
+
+  });
+
+}
+
 
 // Contact form -> WhatsApp
 const form = document.getElementById("contactForm");
@@ -90,9 +151,10 @@ if (form) {
   });
 }
 
+
 // Current year
 const yearElement = document.getElementById("year");
 
 if (yearElement) {
   yearElement.textContent = new Date().getFullYear();
-}
+          }

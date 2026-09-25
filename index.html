@@ -472,97 +472,706 @@
     </section>
 
     <!-- Student Dashboard -->
-    <section class="section dashboard-section" id="studentDashboard">
+    <!-- Student Dashboard -->
+<section class="section dashboard-section" id="studentDashboard">
 
-      <div class="container">
+  <style>
+    .student-welcome {
+      background: linear-gradient(135deg, #ecfdf5, #ffffff);
+      padding: 28px;
+      border-radius: 20px;
+      margin-bottom: 25px;
+      border: 1px solid #d1fae5;
+    }
 
-        <div class="dashboard-header">
-          <div>
-            <span class="eyebrow">STUDENT DASHBOARD</span>
-            <h2>Assalamu Alaikum, Student 👋</h2>
-            <p>Welcome to your Minhaj ul Quran learning dashboard.</p>
-          </div>
+    .student-welcome h2 {
+      margin: 8px 0;
+    }
 
-          <button class="btn btn-secondary" id="logoutBtn" type="button">
-            Logout
-          </button>
+    .student-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 25px;
+    }
+
+    .student-stat {
+      background: #fff;
+      padding: 22px;
+      border-radius: 18px;
+      box-shadow: 0 5px 20px rgba(0,0,0,.08);
+      border: 1px solid #e5e7eb;
+    }
+
+    .student-stat-icon {
+      font-size: 30px;
+      margin-bottom: 10px;
+    }
+
+    .student-stat h3 {
+      margin: 5px 0;
+    }
+
+    .student-stat strong {
+      color: #047857;
+      font-size: 18px;
+    }
+
+    .student-progress {
+      background: #e5e7eb;
+      height: 10px;
+      border-radius: 20px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .student-progress span {
+      display: block;
+      width: 35%;
+      height: 100%;
+      background: #047857;
+      border-radius: 20px;
+    }
+
+    .student-feature-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .student-feature {
+      background: #fff;
+      padding: 24px;
+      border-radius: 20px;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 5px 20px rgba(0,0,0,.06);
+    }
+
+    .student-feature h3 {
+      margin-top: 0;
+    }
+
+    .student-feature p {
+      color: #6b7280;
+    }
+
+    .student-feature button {
+      margin-top: 10px;
+    }
+
+    .lesson-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    .lesson-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 14px;
+      background: #f0fdf4;
+      border-radius: 12px;
+    }
+
+    .teacher-box {
+      background: #ecfdf5;
+      padding: 18px;
+      border-radius: 14px;
+      margin-top: 15px;
+    }
+
+    .student-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      z-index: 10000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .student-modal-box {
+      background: white;
+      width: 100%;
+      max-width: 520px;
+      max-height: 85vh;
+      overflow-y: auto;
+      border-radius: 20px;
+      padding: 25px;
+      position: relative;
+    }
+
+    .student-modal-close {
+      position: absolute;
+      right: 15px;
+      top: 12px;
+      border: none;
+      background: none;
+      font-size: 25px;
+      cursor: pointer;
+    }
+
+    @media(max-width: 800px) {
+      .student-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .student-feature-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media(max-width: 500px) {
+      .student-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .lesson-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .student-welcome {
+        padding: 20px;
+      }
+    }
+  </style>
+
+
+  <div class="container">
+
+    <!-- Welcome -->
+    <div class="student-welcome">
+
+      <span class="eyebrow">STUDENT DASHBOARD</span>
+
+      <h2>
+        Assalamu Alaikum, Student 👋
+      </h2>
+
+      <p>
+        Welcome to your Minhaj ul Quran learning dashboard.
+      </p>
+
+      <button
+        class="btn btn-secondary"
+        id="logoutBtn"
+        type="button">
+        Logout
+      </button>
+
+    </div>
+
+
+    <!-- Stats -->
+    <div class="student-stats">
+
+      <div class="student-stat">
+        <div class="student-stat-icon">📚</div>
+        <h3>My Course</h3>
+        <p>Quran Nazra with Tajweed</p>
+        <strong>Active</strong>
+      </div>
+
+
+      <div class="student-stat">
+        <div class="student-stat-icon">📅</div>
+        <h3>Next Class</h3>
+        <p>Class Schedule</p>
+        <strong>To be scheduled</strong>
+      </div>
+
+
+      <div class="student-stat">
+        <div class="student-stat-icon">✅</div>
+        <h3>Attendance</h3>
+        <p>Classes attended</p>
+        <strong>0 Classes</strong>
+      </div>
+
+
+      <div class="student-stat">
+        <div class="student-stat-icon">📊</div>
+        <h3>Progress</h3>
+        <p>Course progress</p>
+        <strong>35%</strong>
+
+        <div class="student-progress">
+          <span></span>
         </div>
+      </div>
 
-        <div class="dashboard-cards">
+    </div>
 
-          <div class="dashboard-card">
-            <div class="dashboard-icon">📚</div>
-            <h3>My Courses</h3>
-            <p>Quran Nazra with Tajweed</p>
-            <span>Active Course</span>
-          </div>
 
-          <div class="dashboard-card">
-            <div class="dashboard-icon">📅</div>
-            <h3>Class Schedule</h3>
-            <p>Next Class</p>
-            <strong>To be scheduled</strong>
-          </div>
+    <!-- Main Features -->
+    <div class="student-feature-grid">
 
-          <div class="dashboard-card">
-            <div class="dashboard-icon">✅</div>
-            <h3>Attendance</h3>
-            <p>Your class attendance</p>
-            <strong>0 Classes</strong>
-          </div>
 
-          <div class="dashboard-card">
-            <div class="dashboard-icon">📈</div>
-            <h3>Progress</h3>
-            <p>Learning progress</p>
-            <strong>Getting Started</strong>
-          </div>
+      <!-- My Courses -->
+      <div class="student-feature">
 
-        </div>
+        <h3>📚 My Courses</h3>
 
-        <div class="dashboard-panel">
+        <p>
+          Your currently active Quran learning course.
+        </p>
 
-          <h3>📖 My Learning</h3>
+        <div class="teacher-box">
+          <strong>
+            Quran Nazra with Tajweed
+          </strong>
 
-          <div class="lesson-item">
-            <div>
-              <strong>Quran Nazra</strong>
-              <p>Continue your Quran reading lessons.</p>
-            </div>
+          <p>
+            Learn Quran reading, pronunciation and basic Tajweed rules.
+          </p>
 
-            <button class="btn btn-primary" type="button">
-              Open Lesson
-            </button>
-          </div>
-
-          <div class="lesson-item">
-            <div>
-              <strong>Tajweed</strong>
-              <p>Learn correct pronunciation and Quran rules.</p>
-            </div>
-
-            <button class="btn btn-primary" type="button">
-              View Course
-            </button>
-          </div>
-
-        </div>
-
-        <div class="dashboard-support">
-          <h3>Need Help?</h3>
-          <p>Contact your academy through WhatsApp.</p>
-
-          <a
+          <button
             class="btn btn-primary"
-            href="https://wa.me/923027445729?text=Assalamu%20Alaikum%2C%20I%20need%20help%20with%20my%20student%20dashboard."
-            target="_blank">
-            💬 WhatsApp Support
-          </a>
+            type="button"
+            onclick="openStudentModal('courseModal')">
+            Open Course
+          </button>
         </div>
 
       </div>
 
-    </section>
+
+      <!-- Class Schedule -->
+      <div class="student-feature">
+
+        <h3>📅 Class Schedule</h3>
+
+        <p>
+          Your upcoming online Quran class.
+        </p>
+
+        <div class="teacher-box">
+
+          <strong>
+            Next Class
+          </strong>
+
+          <p>
+            Date: To be scheduled
+          </p>
+
+          <p>
+            Time: To be scheduled
+          </p>
+
+          <button
+            class="btn btn-primary"
+            type="button"
+            onclick="openStudentModal('scheduleModal')">
+            View Schedule
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- Learning Lessons -->
+      <div class="student-feature">
+
+        <h3>📖 My Lessons</h3>
+
+        <p>
+          Continue your Quran learning lessons.
+        </p>
+
+        <div class="lesson-list">
+
+          <div class="lesson-row">
+
+            <div>
+              <strong>Lesson 1</strong>
+              <br>
+              <small>Quran Nazra Basics</small>
+            </div>
+
+            <button
+              class="btn btn-primary"
+              type="button"
+              onclick="openStudentModal('lessonModal')">
+              Start
+            </button>
+
+          </div>
+
+
+          <div class="lesson-row">
+
+            <div>
+              <strong>Lesson 2</strong>
+              <br>
+              <small>Basic Tajweed</small>
+            </div>
+
+            <button
+              class="btn btn-primary"
+              type="button"
+              onclick="openStudentModal('lessonModal')">
+              View
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- Progress -->
+      <div class="student-feature">
+
+        <h3>📊 My Progress</h3>
+
+        <p>
+          Track your learning progress.
+        </p>
+
+        <div class="teacher-box">
+
+          <strong>
+            Quran Nazra
+          </strong>
+
+          <p>
+            Overall Progress: 35%
+          </p>
+
+          <div class="student-progress">
+            <span></span>
+          </div>
+
+          <br>
+
+          <button
+            class="btn btn-primary"
+            type="button"
+            onclick="openStudentModal('progressModal')">
+            View Progress
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- Teacher -->
+      <div class="student-feature">
+
+        <h3>👨‍🏫 My Teacher</h3>
+
+        <p>
+          Information about your Quran teacher.
+        </p>
+
+        <div class="teacher-box">
+
+          <strong>
+            Quran Teacher
+          </strong>
+
+          <p>
+            Your teacher information will appear here
+            after the class is scheduled.
+          </p>
+
+          <a
+            class="btn btn-primary"
+            href="https://wa.me/923027445729?text=Assalamu%20Alaikum%2C%20I%20need%20information%20about%20my%20Quran%20teacher."
+            target="_blank">
+            Contact Academy
+          </a>
+
+        </div>
+
+      </div>
+
+
+      <!-- Assignments -->
+      <div class="student-feature">
+
+        <h3>📝 Assignments</h3>
+
+        <p>
+          Check your Quran learning homework.
+        </p>
+
+        <div class="teacher-box">
+
+          <strong>
+            No assignment yet
+          </strong>
+
+          <p>
+            Your teacher's assignments will appear here.
+          </p>
+
+          <button
+            class="btn btn-primary"
+            type="button"
+            onclick="openStudentModal('assignmentModal')">
+            View Assignments
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- Support -->
+      <div class="student-feature">
+
+        <h3>💬 Academy Support</h3>
+
+        <p>
+          Need help with your course, class or schedule?
+        </p>
+
+        <a
+          class="btn btn-primary"
+          href="https://wa.me/923027445729?text=Assalamu%20Alaikum%2C%20I%20need%20help%20with%20my%20student dashboard."
+          target="_blank">
+          WhatsApp Support
+        </a>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- Course Modal -->
+  <div class="student-modal" id="courseModal">
+
+    <div class="student-modal-box">
+
+      <button
+        class="student-modal-close"
+        onclick="closeStudentModal('courseModal')">
+        ×
+      </button>
+
+      <h2>📚 Quran Nazra with Tajweed</h2>
+
+      <p>
+        Welcome to your Quran course.
+      </p>
+
+      <hr>
+
+      <h3>Course Contents</h3>
+
+      <p>✓ Quran Reading</p>
+      <p>✓ Makharij</p>
+      <p>✓ Basic Tajweed</p>
+      <p>✓ Daily Quran Practice</p>
+      <p>✓ Teacher Guidance</p>
+
+      <button
+        class="btn btn-primary"
+        onclick="closeStudentModal('courseModal')">
+        Start Learning
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- Schedule Modal -->
+  <div class="student-modal" id="scheduleModal">
+
+    <div class="student-modal-box">
+
+      <button
+        class="student-modal-close"
+        onclick="closeStudentModal('scheduleModal')">
+        ×
+      </button>
+
+      <h2>📅 Class Schedule</h2>
+
+      <p>
+        Your class schedule will appear here.
+      </p>
+
+      <div class="teacher-box">
+
+        <strong>
+          Next Class
+        </strong>
+
+        <p>
+          Date: To be scheduled
+        </p>
+
+        <p>
+          Time: To be scheduled
+        </p>
+
+      </div>
+
+      <a
+        class="btn btn-primary"
+        href="https://wa.me/923027445729?text=Assalamu%20Alaikum%2C%20please%20schedule my Quran class."
+        target="_blank">
+        Request Class Schedule
+      </a>
+
+    </div>
+
+  </div>
+
+
+  <!-- Lesson Modal -->
+  <div class="student-modal" id="lessonModal">
+
+    <div class="student-modal-box">
+
+      <button
+        class="student-modal-close"
+        onclick="closeStudentModal('lessonModal')">
+        ×
+      </button>
+
+      <h2>📖 Quran Lesson</h2>
+
+      <p>
+        Your lesson content will be added here.
+      </p>
+
+      <div class="teacher-box">
+
+        <h3>Quran Nazra</h3>
+
+        <p>
+          Practice reading the Quran slowly and correctly.
+        </p>
+
+        <p>
+          Tajweed rules will be taught by your teacher.
+        </p>
+
+      </div>
+
+      <a
+        class="btn btn-primary"
+        href="https://wa.me/923027445729?text=Assalamu%20Alaikum%2C%20I need help with my Quran lesson."
+        target="_blank">
+        Ask Teacher
+      </a>
+
+    </div>
+
+  </div>
+
+
+  <!-- Progress Modal -->
+  <div class="student-modal" id="progressModal">
+
+    <div class="student-modal-box">
+
+      <button
+        class="student-modal-close"
+        onclick="closeStudentModal('progressModal')">
+        ×
+      </button>
+
+      <h2>📊 My Progress</h2>
+
+      <p>
+        Quran Nazra Progress
+      </p>
+
+      <div class="student-progress">
+        <span></span>
+      </div>
+
+      <h3>35% Completed</h3>
+
+      <p>
+        Keep learning and practicing regularly.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- Assignment Modal -->
+  <div class="student-modal" id="assignmentModal">
+
+    <div class="student-modal-box">
+
+      <button
+        class="student-modal-close"
+        onclick="closeStudentModal('assignmentModal')">
+        ×
+      </button>
+
+      <h2>📝 Assignments</h2>
+
+      <div class="teacher-box">
+
+        <strong>
+          No assignment available
+        </strong>
+
+        <p>
+          Your teacher will add homework here.
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <script>
+
+    function openStudentModal(id) {
+      const modal = document.getElementById(id);
+
+      if (modal) {
+        modal.style.display = "flex";
+      }
+    }
+
+
+    function closeStudentModal(id) {
+      const modal = document.getElementById(id);
+
+      if (modal) {
+        modal.style.display = "none";
+      }
+    }
+
+
+    document.querySelectorAll(".student-modal").forEach(modal => {
+
+      modal.addEventListener("click", function(event) {
+
+        if (event.target === modal) {
+          modal.style.display = "none";
+        }
+
+      });
+
+    });
+
+  </script>
+
+  </section>
     <!-- Contact -->
     <section class="section contact-section" id="contact">
 

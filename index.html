@@ -214,9 +214,11 @@
 <div class="modal" id="teacherLessons"><div class="modal-box"><button class="modal-close" onclick="closeModal('teacherLessons')">×</button><h2>📖 Lesson Management</h2><p>Add lesson topics, notes and homework after backend integration.</p><button class="btn btn-primary" onclick="showToast('Lesson demo action completed.')">Add Demo Lesson</button></div></div>
 
 <script>
-let currentRole='student';
+let currentRole = 'student';
 
-// Firebase configuration for Minhaj ul Quran Academy
+// ===============================
+// FIREBASE CONFIGURATION
+// ===============================
 const firebaseConfig = {
   apiKey: "AIzaSyAmmtYNe3W1ez9iVLXHm5b5xvLsdT134IQ",
   authDomain: "minhaj-ul-quran-729.firebaseapp.com",
@@ -229,136 +231,609 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
+
 const TEACHER_EMAIL = 'teacher@gmail.com';
 
-function setRole(role){
-  currentRole=role;
-  document.getElementById('studentTab').classList.toggle('active',role==='student');
-  document.getElementById('teacherTab').classList.toggle('active',role==='teacher');
-  document.getElementById('demoText').textContent=role==='student'
-    ? 'Student: use your registered Firebase email and password.'
-    : 'Teacher: use the teacher account created by the Academy admin.';
-  document.getElementById('loginMessage').textContent='';
-  document.getElementById('registerForm').classList.toggle('hidden',role!=='student');
+// ===============================
+// ROLE SELECTION
+// ===============================
+function setRole(role) {
+  currentRole = role;
+
+  document.getElementById('studentTab').classList.toggle(
+    'active',
+    role === 'student'
+  );
+
+  document.getElementById('teacherTab').classList.toggle(
+    'active',
+    role === 'teacher'
+  );
+
+  document.getElementById('demoText').textContent =
+    role === 'student'
+      ? 'Student: use your registered Firebase email and password.'
+      : 'Teacher: use the teacher account created by the Academy admin.';
+
+  document.getElementById('loginMessage').textContent = '';
+
+  document.getElementById('registerForm').classList.toggle(
+    'hidden',
+    role !== 'student'
+  );
 }
 
-function toggleRegister(){
-  if(currentRole!=='student') return;
+// ===============================
+// REGISTER FORM TOGGLE
+// ===============================
+function toggleRegister() {
+  if (currentRole !== 'student') return;
+
   document.getElementById('registerForm').classList.toggle('hidden');
-  document.getElementById('loginMessage').textContent='';
+  document.getElementById('loginMessage').textContent = '';
 }
 
-function showMessage(msg, ok=false){
-  const el=document.getElementById('loginMessage');
-  el.style.color=ok?'#075e45':'#b42318';
-  el.textContent=msg;
+// ===============================
+// MESSAGE
+// ===============================
+function showMessage(msg, ok = false) {
+  const el = document.getElementById('loginMessage');
+
+  if (!el) return;
+
+  el.style.color = ok ? '#075e45' : '#b42318';
+  el.textContent = msg;
 }
 
-function friendlyAuthError(code){
-  const map={
-    'auth/invalid-email':'Please enter a valid email address.',
-    'auth/user-not-found':'No account was found with this email.',
-    'auth/wrong-password':'Incorrect password. Please try again.',
-    'auth/invalid-credential':'Email or password is incorrect.',
-    'auth/email-already-in-use':'This email is already registered. Please log in.',
-    'auth/weak-password':'Password should be at least 6 characters.',
-    'auth/too-many-requests':'Too many attempts. Please wait and try again.',
-    'auth/network-request-failed':'Network problem. Check your internet connection.'
+// ===============================
+// FIREBASE ERROR MESSAGES
+// ===============================
+function friendlyAuthError(code) {
+  const map = {
+    'auth/invalid-email':
+      'Please enter a valid email address.',
+
+    'auth/user-not-found':
+      'No account was found with this email.',
+
+    'auth/wrong-password':
+      'Incorrect password. Please try again.',
+
+    'auth/invalid-credential':
+      'Email or password is incorrect.',
+
+    'auth/email-already-in-use':
+      'This email is already registered. Please log in.',
+
+    'auth/weak-password':
+      'Password should be at least 6 characters.',
+
+    'auth/too-many-requests':
+      'Too many attempts. Please wait and try again.',
+
+    'auth/network-request-failed':
+      'Network problem. Check your internet connection.',
+
+    'auth/user-disabled':
+      'This account has been disabled.',
+
+    'auth/operation-not-allowed':
+      'This sign-in method is not enabled in Firebase.',
+
+    'auth/requires-recent-login':
+      'Please log in again and try this action.'
   };
+
   return map[code] || 'Something went wrong. Please try again.';
 }
 
-document.getElementById('loginForm').addEventListener('submit',async function(e){
-  e.preventDefault();
-  const email=document.getElementById('email').value.trim().toLowerCase();
-  const password=document.getElementById('password').value;
-  showMessage('Signing in...',true);
-  try{
-    const cred=await auth.signInWithEmailAndPassword(email,password);
-    const user=cred.user;
-    if(currentRole==='teacher' && user.email.toLowerCase()!==TEACHER_EMAIL){
-      await auth.signOut();
-      showMessage('This account is not the Academy teacher account.');
+// ===============================
+// LOGIN
+// ===============================
+document.getElementById('loginForm').addEventListener(
+  'submit',
+  async function(e) {
+
+    e.preventDefault();
+
+    const email = document
+      .getElementById('email')
+      .value
+      .trim()
+      .toLowerCase();
+
+    const password = document
+      .getElementById('password')
+      .value;
+
+    showMessage('Signing in...', true);
+
+    try {
+
+      const cred =
+        await auth.signInWithEmailAndPassword(
+          email,
+          password
+        );
+
+      const user = cred.user;
+
+      // Teacher account check
+      if (
+        currentRole === 'teacher' &&
+        user.email.toLowerCase() !== TEACHER_EMAIL
+      ) {
+
+        await auth.signOut();
+
+        showMessage(
+          'This account is not the Academy teacher account.'
+        );
+
+        return;
+      }
+
+      // Prevent teacher account from Student login
+      if (
+        currentRole === 'student' &&
+        user.email.toLowerCase() === TEACHER_EMAIL
+      ) {
+
+        await auth.signOut();
+
+        showMessage(
+          'Please select Teacher to use the teacher account.'
+        );
+
+        return;
+      }
+
+      // Save login information
+      localStorage.setItem(
+        'mq_role',
+        currentRole
+      );
+
+      localStorage.setItem(
+        'mq_email',
+        user.email || ''
+      );
+
+      // Show dashboard
+      showPortal(currentRole);
+
+      showMessage('', true);
+
+      window.location.hash =
+        currentRole === 'student'
+          ? 'studentDashboard'
+          : 'teacherDashboard';
+
+    } catch (error) {
+
+      showMessage(
+        friendlyAuthError(error.code)
+      );
+
+    }
+  }
+);
+
+// ===============================
+// STUDENT REGISTRATION
+// ===============================
+document.getElementById('registerForm').addEventListener(
+  'submit',
+  async function(e) {
+
+    e.preventDefault();
+
+    const name = document
+      .getElementById('registerName')
+      .value
+      .trim();
+
+    const email = document
+      .getElementById('registerEmail')
+      .value
+      .trim()
+      .toLowerCase();
+
+    const password = document
+      .getElementById('registerPassword')
+      .value;
+
+    if (!name) {
+      showMessage('Please enter your name.');
       return;
     }
-    if(currentRole==='student' && user.email.toLowerCase()===TEACHER_EMAIL){
-      await auth.signOut();
-      showMessage('Please select Teacher to use the teacher account.');
+
+    if (password.length < 6) {
+      showMessage(
+        'Password should be at least 6 characters.'
+      );
       return;
     }
-    localStorage.setItem('mq_role',currentRole);
-    localStorage.setItem('mq_email',user.email||'');
-    showPortal(currentRole);
-    showMessage('');
-    window.location.hash=currentRole==='student'?'studentDashboard':'teacherDashboard';
-  }catch(error){
-    showMessage(friendlyAuthError(error.code));
-  }
-});
 
-document.getElementById('registerForm').addEventListener('submit',async function(e){
-  e.preventDefault();
-  const name=document.getElementById('registerName').value.trim();
-  const email=document.getElementById('registerEmail').value.trim().toLowerCase();
-  const password=document.getElementById('registerPassword').value;
-  if(!name){showMessage('Please enter your name.');return;}
-  showMessage('Creating your account...',true);
-  try{
-    const cred=await auth.createUserWithEmailAndPassword(email,password);
-    await cred.user.updateProfile({displayName:name});
-    localStorage.setItem('mq_role','student');
-    localStorage.setItem('mq_email',cred.user.email||'');
-    document.getElementById('registerForm').classList.add('hidden');
-    showPortal('student');
-    showMessage('Account created successfully.',true);
-    window.location.hash='studentDashboard';
-  }catch(error){
-    showMessage(friendlyAuthError(error.code));
-  }
-});
+    showMessage(
+      'Creating your account...',
+      true
+    );
 
-function showPortal(role){
-  document.getElementById('loginBox').classList.add('hidden');
-  document.getElementById('studentDashboard').classList.remove('active');
-  document.getElementById('teacherDashboard').classList.remove('active');
-  document.getElementById(role==='student'?'studentDashboard':'teacherDashboard').classList.add('active');
-  document.getElementById('portal').scrollIntoView({behavior:'smooth'});
+    try {
+
+      const cred =
+        await auth.createUserWithEmailAndPassword(
+          email,
+          password
+        );
+
+      // Save student's name
+      await cred.user.updateProfile({
+        displayName: name
+      });
+
+      // Send verification email
+      try {
+        await cred.user.sendEmailVerification();
+      } catch (verificationError) {
+        console.log(
+          'Verification email could not be sent:',
+          verificationError
+        );
+      }
+
+      localStorage.setItem(
+        'mq_role',
+        'student'
+      );
+
+      localStorage.setItem(
+        'mq_email',
+        cred.user.email || ''
+      );
+
+      document
+        .getElementById('registerForm')
+        .classList.add('hidden');
+
+      showPortal('student');
+
+      showMessage(
+        'Account created successfully. Please check your email for verification.',
+        true
+      );
+
+      window.location.hash =
+        'studentDashboard';
+
+    } catch (error) {
+
+      showMessage(
+        friendlyAuthError(error.code)
+      );
+
+    }
+  }
+);
+
+// ===============================
+// FORGOT PASSWORD
+// ===============================
+async function forgotPassword() {
+
+  const email = document
+    .getElementById('email')
+    .value
+    .trim()
+    .toLowerCase();
+
+  if (!email) {
+
+    showMessage(
+      'Please enter your email first.'
+    );
+
+    return;
+  }
+
+  showMessage(
+    'Sending password reset email...',
+    true
+  );
+
+  try {
+
+    await auth.sendPasswordResetEmail(email);
+
+    showMessage(
+      'Password reset email sent. Please check your inbox.',
+      true
+    );
+
+  } catch (error) {
+
+    showMessage(
+      friendlyAuthError(error.code)
+    );
+
+  }
 }
 
-function logout(){
-  auth.signOut().finally(()=>{
-    localStorage.removeItem('mq_role');
-    localStorage.removeItem('mq_email');
-    document.getElementById('loginBox').classList.remove('hidden');
-    document.getElementById('studentDashboard').classList.remove('active');
-    document.getElementById('teacherDashboard').classList.remove('active');
-    document.getElementById('email').value='';
-    document.getElementById('password').value='';
-    document.getElementById('loginMessage').textContent='You have been logged out.';
-    document.getElementById('portal').scrollIntoView({behavior:'smooth'});
+// ===============================
+// RESEND VERIFICATION EMAIL
+// ===============================
+async function resendVerificationEmail() {
+
+  const user = auth.currentUser;
+
+  if (!user) {
+
+    showMessage(
+      'Please log in first.'
+    );
+
+    return;
+  }
+
+  try {
+
+    await user.sendEmailVerification();
+
+    showMessage(
+      'Verification email sent again. Please check your inbox.',
+      true
+    );
+
+  } catch (error) {
+
+    showMessage(
+      friendlyAuthError(error.code)
+    );
+
+  }
+}
+
+// ===============================
+// ADD FORGOT PASSWORD BUTTON
+// ===============================
+const loginForm =
+  document.getElementById('loginForm');
+
+if (loginForm) {
+
+  const forgotButton =
+    document.createElement('button');
+
+  forgotButton.type = 'button';
+  forgotButton.textContent =
+    '🔑 Forgot Password?';
+
+  forgotButton.className =
+    'btn btn-light';
+
+  forgotButton.style.width = '100%';
+  forgotButton.style.marginTop = '10px';
+
+  forgotButton.onclick =
+    forgotPassword;
+
+  loginForm.appendChild(
+    forgotButton
+  );
+}
+
+// ===============================
+// SHOW PORTAL / DASHBOARD
+// ===============================
+function showPortal(role) {
+
+  document
+    .getElementById('loginBox')
+    .classList.add('hidden');
+
+  document
+    .getElementById('studentDashboard')
+    .classList.remove('active');
+
+  document
+    .getElementById('teacherDashboard')
+    .classList.remove('active');
+
+  const dashboard =
+    document.getElementById(
+      role === 'student'
+        ? 'studentDashboard'
+        : 'teacherDashboard'
+    );
+
+  dashboard.classList.add('active');
+
+  document
+    .getElementById('portal')
+    .scrollIntoView({
+      behavior: 'smooth'
+    });
+}
+
+// ===============================
+// LOGOUT
+// ===============================
+function logout() {
+
+  auth.signOut().finally(() => {
+
+    localStorage.removeItem(
+      'mq_role'
+    );
+
+    localStorage.removeItem(
+      'mq_email'
+    );
+
+    document
+      .getElementById('loginBox')
+      .classList.remove('hidden');
+
+    document
+      .getElementById('studentDashboard')
+      .classList.remove('active');
+
+    document
+      .getElementById('teacherDashboard')
+      .classList.remove('active');
+
+    document
+      .getElementById('email')
+      .value = '';
+
+    document
+      .getElementById('password')
+      .value = '';
+
+    showMessage(
+      'You have been logged out.',
+      true
+    );
+
+    document
+      .getElementById('portal')
+      .scrollIntoView({
+        behavior: 'smooth'
+      });
   });
 }
 
-function openModal(id){document.getElementById(id).classList.add('show')}
-function closeModal(id){document.getElementById(id).classList.remove('show')}
-window.addEventListener('click',e=>{if(e.target.classList.contains('modal'))e.target.classList.remove('show')});
-function toggleMenu(){document.getElementById('nav').classList.toggle('open')}
-function closeMenu(){document.getElementById('nav').classList.remove('open')}
-function toggleChat(){document.getElementById('chatbox').classList.toggle('show')}
-function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',2500)}
+// ===============================
+// MODALS
+// ===============================
+function openModal(id) {
 
-// Restore a signed-in Firebase session after refresh.
-auth.onAuthStateChanged(user=>{
-  if(!user){return;}
-  const savedRole=localStorage.getItem('mq_role');
-  if(savedRole==='student' || savedRole==='teacher'){
-    if(savedRole==='teacher' && user.email.toLowerCase()!==TEACHER_EMAIL){
+  const modal =
+    document.getElementById(id);
+
+  if (modal) {
+    modal.classList.add('show');
+  }
+}
+
+function closeModal(id) {
+
+  const modal =
+    document.getElementById(id);
+
+  if (modal) {
+    modal.classList.remove('show');
+  }
+}
+
+window.addEventListener(
+  'click',
+  e => {
+
+    if (
+      e.target.classList.contains('modal')
+    ) {
+      e.target.classList.remove('show');
+    }
+
+  }
+);
+
+// ===============================
+// MOBILE MENU
+// ===============================
+function toggleMenu() {
+
+  document
+    .getElementById('nav')
+    .classList.toggle('open');
+}
+
+function closeMenu() {
+
+  document
+    .getElementById('nav')
+    .classList.remove('open');
+}
+
+// ===============================
+// CHAT
+// ===============================
+function toggleChat() {
+
+  const chatbox =
+    document.getElementById('chatbox');
+
+  if (chatbox) {
+    chatbox.classList.toggle('show');
+  }
+}
+
+// ===============================
+// TOAST
+// ===============================
+function showToast(msg) {
+
+  const t =
+    document.getElementById('toast');
+
+  if (!t) return;
+
+  t.textContent = msg;
+  t.style.display = 'block';
+
+  setTimeout(() => {
+    t.style.display = 'none';
+  }, 2500);
+}
+
+// ===============================
+// RESTORE FIREBASE SESSION
+// ===============================
+auth.onAuthStateChanged(user => {
+
+  if (!user) {
+    return;
+  }
+
+  const savedRole =
+    localStorage.getItem('mq_role');
+
+  if (
+    savedRole === 'student' ||
+    savedRole === 'teacher'
+  ) {
+
+    // Verify teacher account
+    if (
+      savedRole === 'teacher' &&
+      user.email &&
+      user.email.toLowerCase() !==
+      TEACHER_EMAIL
+    ) {
+
       auth.signOut();
       return;
     }
+
+    // Prevent teacher from being restored
+    // as student
+    if (
+      savedRole === 'student' &&
+      user.email &&
+      user.email.toLowerCase() ===
+      TEACHER_EMAIL
+    ) {
+
+      auth.signOut();
+      return;
+    }
+
     showPortal(savedRole);
   }
 });
-</script>
+
+  </script>
 </body>
 </html>

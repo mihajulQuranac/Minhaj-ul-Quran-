@@ -671,7 +671,129 @@ if (loginForm) {
     forgotButton
   );
 }
+// ===============================
+// LOAD STUDENT PROFILE FROM FIRESTORE
+// ===============================
+async function loadStudentProfile(user) {
 
+  if (!user) return;
+
+  try {
+
+    const studentRef =
+      db.collection('students').doc(user.uid);
+
+    const studentSnap =
+      await studentRef.get();
+
+    // If profile does not exist, create it
+    if (!studentSnap.exists) {
+
+      await studentRef.set({
+
+        uid: user.uid,
+        name: user.displayName || 'Student',
+        email: user.email || '',
+        role: 'student',
+        course: 'Quran Nazra',
+        status: 'Active',
+        attendance: 0,
+        progress: 0,
+        feeStatus: 'Pending',
+        teacher: 'Not Assigned',
+
+        createdAt:
+          firebase.firestore.FieldValue.serverTimestamp(),
+
+        updatedAt:
+          firebase.firestore.FieldValue.serverTimestamp()
+
+      });
+
+      console.log(
+        'Student profile created in Firestore.'
+      );
+
+      return;
+    }
+
+    const data =
+      studentSnap.data();
+
+    console.log(
+      'Student Firestore data:',
+      data
+    );
+
+    // ===============================
+    // UPDATE STUDENT DASHBOARD
+    // ===============================
+
+    const dashboard =
+      document.getElementById('studentDashboard');
+
+    if (!dashboard) return;
+
+    const stats =
+      dashboard.querySelectorAll('.stat');
+
+    // Course
+    if (stats[0]) {
+
+      const value =
+        stats[0].querySelector('b');
+
+      if (value) {
+        value.textContent =
+          data.course || 'Quran Nazra';
+      }
+    }
+
+    // Next class
+    if (stats[1]) {
+
+      const value =
+        stats[1].querySelector('b');
+
+      if (value) {
+        value.textContent =
+          'Scheduled';
+      }
+    }
+
+    // Attendance
+    if (stats[2]) {
+
+      const value =
+        stats[2].querySelector('b');
+
+      if (value) {
+        value.textContent =
+          `${data.attendance || 0}%`;
+      }
+    }
+
+    // Progress
+    if (stats[3]) {
+
+      const value =
+        stats[3].querySelector('b');
+
+      if (value) {
+        value.textContent =
+          `${data.progress || 0}%`;
+      }
+    }
+
+  } catch (error) {
+
+    console.error(
+      'Error loading student profile:',
+      error
+    );
+
+  }
+  }
 // ===============================
 // SHOW PORTAL / DASHBOARD
 // ===============================
@@ -705,6 +827,9 @@ if (role === 'student') {
 
   if (welcome) {
     welcome.textContent = `Assalamu Alaikum, ${name} 👋`;
+  }
+  if (user) {
+  loadStudentProfile(user);
   }
   }
   document

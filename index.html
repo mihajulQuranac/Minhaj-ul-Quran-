@@ -140,7 +140,14 @@
       <div class="feature"><h3>📚 My Courses</h3><p>Quran Nazra with Tajweed</p><button class="btn btn-light" onclick="openModal('studentCourse')">View Course</button></div>
       <div class="feature"><h3>📅 Class Schedule</h3><p>Manage your upcoming online classes.</p><button class="btn btn-light" onclick="openModal('studentSchedule')">View Schedule</button></div>
       <div class="feature"><h3>📖 My Lessons</h3><p>Continue your assigned lessons.</p><button class="btn btn-light" onclick="openModal('studentLessons')">View Lessons</button></div>
-      <div class="feature"><h3>📈 My Progress</h3><div class="progress"><span></span></div><p>35% completed</p><button class="btn btn-light" onclick="openModal('studentProgress')">Details</button></div>
+      <div class="feature">
+  <h3>📈 My Progress</h3>
+  <div class="progress">
+    <span id="studentProgressBar"></span>
+  </div>
+  <p id="studentProgressText">0% completed</p>
+  <button class="btn btn-light" onclick="openModal('studentProgress')">Details</button>
+      </div>
       <div class="feature"><h3>📝 Assignments</h3><p>Check homework and teacher instructions.</p><button class="btn btn-light" onclick="openModal('studentAssignments')">View Assignments</button></div>
       <div class="feature"><h3>🏆 Certificates</h3><p>Completed-course certificates will appear here.</p><button class="btn btn-light" onclick="showToast('Certificate section is ready for future certificates.')">View Certificates</button></div>
       <div class="feature"><h3>👨‍🏫 My Teacher</h3><p>Teacher: Assigned by Academy</p><a class="btn whatsapp" href="https://wa.me/923027445729?text=Assalamu%20Alaikum%2C%20I%20need%20help%20with%20my%20class." target="_blank">WhatsApp Teacher</a></div>

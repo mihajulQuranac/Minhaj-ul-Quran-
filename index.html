@@ -791,7 +791,27 @@ async function loadStudentProfile(user) {
           `${data.progress || 0}%`;
       }
     }
+// ===============================
+// UPDATE MY PROGRESS CARD
+// ===============================
 
+const progressBar =
+  document.getElementById('studentProgressBar');
+
+const progressText =
+  document.getElementById('studentProgressText');
+
+const progress =
+  Number(data.progress) || 0;
+
+if (progressBar) {
+  progressBar.style.width = `${progress}%`;
+}
+
+if (progressText) {
+  progressText.textContent =
+    `${progress}% completed`;
+  }
   } catch (error) {
 
     console.error(

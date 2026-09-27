@@ -648,7 +648,16 @@ function showPortal(role) {
     );
 
   dashboard.classList.add('active');
+if (role === 'student') {
+  const user = auth.currentUser;
+  const name = user?.displayName?.trim() || 'Student';
 
+  const welcome = document.getElementById('studentWelcome');
+
+  if (welcome) {
+    welcome.textContent = `Assalamu Alaikum, ${name} 👋`;
+  }
+  }
   document
     .getElementById('portal')
     .scrollIntoView({

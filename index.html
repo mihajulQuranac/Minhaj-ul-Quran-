@@ -420,102 +420,151 @@ document.getElementById('loginForm').addEventListener(
 );
 
 // ===============================
-// STUDENT REGISTRATION
+// STUDENT REGISTRATION + FIRESTORE
 // ===============================
-document.getElementById('registerForm').addEventListener(
-  'submit',
-  async function(e) {
+document.getElementById('registerForm').addEventListener('submit', async function(e) {
 
-    e.preventDefault();
+  e.preventDefault();
 
-    const name = document
-      .getElementById('registerName')
-      .value
-      .trim();
+  const name =
+    document.getElementById('registerName').value.trim();
 
-    const email = document
-      .getElementById('registerEmail')
-      .value
-      .trim()
-      .toLowerCase();
+  const email =
+    document.getElementById('registerEmail').value.trim().toLowerCase();
 
-    const password = document
-      .getElementById('registerPassword')
-      .value;
+  const password =
+    document.getElementById('registerPassword').value;
 
-    if (!name) {
-      showMessage('Please enter your name.');
-      return;
-    }
+  if (!name) {
+    showMessage('Please enter your name.');
+    return;
+  }
 
-    if (password.length < 6) {
-      showMessage(
-        'Password should be at least 6 characters.'
+  if (!email) {
+    showMessage('Please enter your email.');
+    return;
+  }
+
+  if (password.length < 6) {
+    showMessage(
+      'Password should be at least 6 characters.'
+    );
+    return;
+  }
+
+  showMessage(
+    'Creating your account...',
+    true
+  );
+
+  try {
+
+    // Create Firebase Authentication account
+    const cred =
+      await auth.createUserWithEmailAndPassword(
+        email,
+        password
       );
-      return;
+
+    const user = cred.user;
+
+    // Save student's name in Firebase Auth
+    await user.updateProfile({
+      displayName: name
+    });
+
+    // Send email verification
+    try {
+
+      await user.sendEmailVerification();
+
+    } catch (verificationError) {
+
+      console.log(
+        'Verification email could not be sent:',
+        verificationError
+      );
+
     }
+
+    // ===============================
+    // SAVE STUDENT IN FIRESTORE
+    // ===============================
+
+    await db
+      .collection('students')
+      .doc(user.uid)
+      .set({
+
+        uid: user.uid,
+
+        name: name,
+
+        email: user.email,
+
+        role: 'student',
+
+        course: 'Quran Nazra',
+
+        status: 'Active',
+
+        attendance: 0,
+
+        progress: 0,
+
+        feeStatus: 'Pending',
+
+        teacher: 'Not Assigned',
+
+        createdAt:
+          firebase.firestore.FieldValue.serverTimestamp(),
+
+        updatedAt:
+          firebase.firestore.FieldValue.serverTimestamp()
+
+      });
+
+    // Save local session
+    localStorage.setItem(
+      'mq_role',
+      'student'
+    );
+
+    localStorage.setItem(
+      'mq_email',
+      user.email || ''
+    );
+
+    // Hide registration form
+    document
+      .getElementById('registerForm')
+      .classList.add('hidden');
+
+    // Open student dashboard
+    showPortal('student');
 
     showMessage(
-      'Creating your account...',
+      'Account created successfully. Your student profile has been saved.',
       true
     );
 
-    try {
+    window.location.hash =
+      'studentDashboard';
 
-      const cred =
-        await auth.createUserWithEmailAndPassword(
-          email,
-          password
-        );
+  } catch (error) {
 
-      // Save student's name
-      await cred.user.updateProfile({
-        displayName: name
-      });
+    console.error(
+      'Registration error:',
+      error
+    );
 
-      // Send verification email
-      try {
-        await cred.user.sendEmailVerification();
-      } catch (verificationError) {
-        console.log(
-          'Verification email could not be sent:',
-          verificationError
-        );
-      }
+    showMessage(
+      friendlyAuthError(error.code)
+    );
 
-      localStorage.setItem(
-        'mq_role',
-        'student'
-      );
-
-      localStorage.setItem(
-        'mq_email',
-        cred.user.email || ''
-      );
-
-      document
-        .getElementById('registerForm')
-        .classList.add('hidden');
-
-      showPortal('student');
-
-      showMessage(
-        'Account created successfully. Please check your email for verification.',
-        true
-      );
-
-      window.location.hash =
-        'studentDashboard';
-
-    } catch (error) {
-
-      showMessage(
-        friendlyAuthError(error.code)
-      );
-
-    }
   }
-);
+
+});
 
 // ===============================
 // FORGOT PASSWORD

@@ -151,7 +151,13 @@
       <div class="feature"><h3>📝 Assignments</h3><p>Check homework and teacher instructions.</p><button class="btn btn-light" onclick="openModal('studentAssignments')">View Assignments</button></div>
       <div class="feature"><h3>🏆 Certificates</h3><p>Completed-course certificates will appear here.</p><button class="btn btn-light" onclick="showToast('Certificate section is ready for future certificates.')">View Certificates</button></div>
       <div class="feature"><h3>👨‍🏫 My Teacher</h3><p>Teacher: Assigned by Academy</p><a class="btn whatsapp" href="https://wa.me/923027445729?text=Assalamu%20Alaikum%2C%20I%20need%20help%20with%20my%20class." target="_blank">WhatsApp Teacher</a></div>
-      <div class="feature"><h3>💳 Fee Status</h3><p><span class="badge">Demo Status: Paid</span></p><p class="small">Connect a real payment system later for live records.</p></div>
+      <div class="feature">
+  <h3>💳 Fee Status</h3>
+  <p>
+    <span class="badge" id="studentFeeStatus">Pending</span>
+  </p>
+  <p class="small">Current fee status from your student profile.</p>
+      </div>
       <div class="feature"><h3>🔔 Notifications</h3><div class="notice">Welcome to your Student Portal.</div><div class="notice">Check your schedule before class.</div></div>
       <div class="feature"><h3>💬 Academy Support</h3><p>Need help? Contact us directly.</p><a class="btn whatsapp" href="https://wa.me/923027445729" target="_blank">WhatsApp Support</a></div>
     </div>
@@ -811,6 +817,16 @@ if (progressBar) {
 if (progressText) {
   progressText.textContent =
     `${progress}% completed`;
+  }// ===============================
+// UPDATE FEE STATUS
+// ===============================
+
+const feeStatus =
+  document.getElementById('studentFeeStatus');
+
+if (feeStatus) {
+  feeStatus.textContent =
+    data.feeStatus || 'Pending';
   }
   } catch (error) {
 
@@ -821,6 +837,7 @@ if (progressText) {
 
   }
   }
+  
 // ===============================
 // SHOW PORTAL / DASHBOARD
 // ===============================

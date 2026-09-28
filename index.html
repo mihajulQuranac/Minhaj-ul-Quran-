@@ -831,6 +831,16 @@ const feeStatus =
 if (feeStatus) {
   feeStatus.textContent =
     data.feeStatus || 'Pending';
+  }// ===============================
+// UPDATE TEACHER NAME
+// ===============================
+
+const teacherName =
+  document.getElementById('studentTeacherName');
+
+if (teacherName) {
+  teacherName.textContent =
+    `Teacher: ${data.teacher || 'Not Assigned'}`;
   }
   } catch (error) {
 

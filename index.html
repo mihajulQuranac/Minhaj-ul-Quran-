@@ -969,51 +969,30 @@ async function loadStudentAssignments(user) {
 
     const snapshot = await db
       .collection('assignments')
-      .where('studentUid', '==', user.uid)
       .get();
-
-    assignmentsList.innerHTML = '';
-
-    if (snapshot.empty) {
-
-      assignmentsList.innerHTML =
-        '<li>No assignment has been added yet.</li>';
-
-      return;
-    }
-
     snapshot.forEach((doc) => {
 
-      const data = doc.data();
+  const data = doc.data();
 
-      const li = document.createElement('li');
-
-      li.innerHTML = `
-        <strong>📝 ${data.title || 'Assignment'}</strong>
-        <br>
-        <span>${data.description || 'No description provided.'}</span>
-        <br>
-        <small>
-          Due: ${data.dueDate || 'No due date'}
-        </small>
-      `;
-
-      assignmentsList.appendChild(li);
-
-    });
-
-  } catch (error) {
-
-    console.error(
-      'Error loading assignments:',
-      error
-    );
-
-    assignmentsList.innerHTML =
-      '<li>Unable to load assignments.</li>';
-
+  if (data.studentUid !== user.uid) {
+    return;
   }
-  }
+
+  const li = document.createElement('li');
+
+  li.innerHTML = `
+    <strong>📝 ${data.title || 'Assignment'}</strong>
+    <br>
+    <span>${data.description || 'No description provided.'}</span>
+    <br>
+    <small>
+      Due: ${data.dueDate || 'No due date'}
+    </small>
+  `;
+
+  assignmentsList.appendChild(li);
+
+});
   
 // ===============================
 // SHOW PORTAL / DASHBOARD

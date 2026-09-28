@@ -253,7 +253,18 @@
   </div>
 </div>
 <div class="modal" id="studentProgress"><div class="modal-box"><button class="modal-close" onclick="closeModal('studentProgress')">×</button><h2>📈 My Progress</h2><div class="progress"><span></span></div><p><b>35%</b> completed.</p><p>Progress data can later be connected to a real database.</p></div></div>
-<div class="modal" id="studentAssignments"><div class="modal-box"><button class="modal-close" onclick="closeModal('studentAssignments')">×</button><h2>📝 Assignments</h2><p>No assignment has been added yet.</p><p>Your teacher's homework will appear here after backend/database integration.</p></div></div>
+<div class="modal" id="studentAssignments">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('studentAssignments')">×</button>
+
+    <h2>📝 Assignments</h2>
+
+    <ul class="list" id="studentAssignmentsList">
+      <li>Loading assignments...</li>
+    </ul>
+
+  </div>
+  </div>
 
 <!-- Teacher Modals -->
 <div class="modal" id="teacherStudents"><div class="modal-box"><button class="modal-close" onclick="closeModal('teacherStudents')">×</button><h2>👨‍🎓 My Students</h2><div class="table-wrap"><table class="data-table"><tr><th>Student</th><th>Course</th><th>Status</th></tr><tr><td>Student 1</td><td>Quran Nazra</td><td><span class="badge">Active</span></td></tr><tr><td>Student 2</td><td>Tajweed</td><td><span class="badge">Active</span></td></tr><tr><td>Student 3</td><td>Hifz</td><td><span class="badge">Active</span></td></tr></table></div></div></div>

@@ -221,7 +221,25 @@
 
 <!-- Student Modals -->
 <div class="modal" id="studentCourse"><div class="modal-box"><button class="modal-close" onclick="closeModal('studentCourse')">×</button><h2>📚 My Course</h2><p><b>Quran Nazra with Tajweed</b></p><ul class="list"><li>Quran reading practice</li><li>Tajweed basics</li><li>Makharij practice</li><li>Regular teacher feedback</li></ul></div></div>
-<div class="modal" id="studentSchedule"><div class="modal-box"><button class="modal-close" onclick="closeModal('studentSchedule')">×</button><h2>📅 Class Schedule</h2><p>Upcoming class: <b>To be confirmed</b></p><p>Your teacher will confirm the class time.</p></div></div>
+<div class="modal" id="studentSchedule">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('studentSchedule')">×</button>
+
+    <h2>📅 Class Schedule</h2>
+
+    <p>
+      Upcoming Class:
+      <b id="studentScheduleDate">Loading...</b>
+    </p>
+
+    <p>
+      Class Time:
+      <b id="studentScheduleTime">Loading...</b>
+    </p>
+
+    <p>Your teacher will confirm the class if any changes are needed.</p>
+  </div>
+</div>
 <div class="modal" id="studentLessons"><div class="modal-box"><button class="modal-close" onclick="closeModal('studentLessons')">×</button><h2>📖 My Lessons</h2><ul class="list"><li>Lesson 1 — Quran Nazra</li><li>Lesson 2 — Tajweed Basics</li><li>Lesson 3 — Makharij</li></ul></div></div>
 <div class="modal" id="studentProgress"><div class="modal-box"><button class="modal-close" onclick="closeModal('studentProgress')">×</button><h2>📈 My Progress</h2><div class="progress"><span></span></div><p><b>35%</b> completed.</p><p>Progress data can later be connected to a real database.</p></div></div>
 <div class="modal" id="studentAssignments"><div class="modal-box"><button class="modal-close" onclick="closeModal('studentAssignments')">×</button><h2>📝 Assignments</h2><p>No assignment has been added yet.</p><p>Your teacher's homework will appear here after backend/database integration.</p></div></div>
@@ -788,7 +806,25 @@ if (nextClass) {
 
   }
   }
+// ===============================
+// UPDATE CLASS SCHEDULE MODAL
+// ===============================
 
+const scheduleDate =
+  document.getElementById('studentScheduleDate');
+
+const scheduleTime =
+  document.getElementById('studentScheduleTime');
+
+if (scheduleDate) {
+  scheduleDate.textContent =
+    data.nextClassDate || 'To be confirmed';
+}
+
+if (scheduleTime) {
+  scheduleTime.textContent =
+    data.nextClassTime || 'To be confirmed';
+  }
     // Attendance
     if (stats[2]) {
 

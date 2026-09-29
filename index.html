@@ -975,7 +975,7 @@ async function loadStudentAssignments(user) {
   try {
 
     const snapshot = await db
-  .collectionGroup('assignments')
+  .collection('assignments')
   .get();
 
     assignmentsList.innerHTML = '';

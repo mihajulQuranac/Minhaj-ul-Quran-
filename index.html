@@ -949,7 +949,7 @@ if (teacherName) {
     );
 
   }
-  }
+}
   // ===============================
 // LOAD STUDENT ASSIGNMENTS FROM FIRESTORE
 // ===============================
@@ -963,28 +963,39 @@ async function loadStudentAssignments(user) {
   if (!assignmentsList) return;
 
   assignmentsList.innerHTML =
-    '<li>Loading assignments...</li>';
+    '<li>Checking assignments...</li>';
 
   try {
 
     const snapshot = await db
       .collection('assignments')
-      .where('studentUid', '==', user.uid)
       .get();
 
     assignmentsList.innerHTML = '';
 
     if (snapshot.empty) {
-
       assignmentsList.innerHTML =
-        '<li>No assignments found.</li>';
-
+        '<li>No assignments exist in Firebase.</li>';
       return;
     }
+
+    let found = false;
 
     snapshot.forEach((doc) => {
 
       const data = doc.data();
+
+      const assignmentUid =
+        String(data.studentUid || '').trim();
+
+      const loggedInUid =
+        String(user.uid || '').trim();
+
+      if (assignmentUid !== loggedInUid) {
+        return;
+      }
+
+      found = true;
 
       const li =
         document.createElement('li');
@@ -1004,6 +1015,22 @@ async function loadStudentAssignments(user) {
       assignmentsList.appendChild(li);
 
     });
+
+    if (!found) {
+
+      assignmentsList.innerHTML = `
+        <li>
+          <strong>No matching assignment found.</strong>
+          <br><br>
+          Logged-in Student UID:
+          <br>
+          <small>${user.uid}</small>
+          <br><br>
+          Please compare this UID with the
+          <strong>studentUid</strong> in Firestore.
+        </li>
+      `;
+    }
 
   } catch (error) {
 

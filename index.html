@@ -974,9 +974,9 @@ async function loadStudentAssignments(user) {
 
   try {
 
-    const snapshot = await db
-  .collection('assignments')
-  .get();
+    const snapshot = await db.collection('assignments').get();
+
+console.log("ASSIGNMENTS COUNT:", snapshot.size);
     assignmentsList.innerHTML = `
   <li>
     <strong>🔑 Logged-in UID:</strong>

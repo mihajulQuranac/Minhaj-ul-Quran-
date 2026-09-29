@@ -974,7 +974,9 @@ async function loadStudentAssignments(user) {
 
   try {
 
-    const snapshot = await db.collection('assignments').get();
+    const snapshot = await firebase.firestore()
+  .collection('assignments')
+  .get();
 
 console.log("ASSIGNMENTS COUNT:", snapshot.size);
     assignmentsList.innerHTML = `

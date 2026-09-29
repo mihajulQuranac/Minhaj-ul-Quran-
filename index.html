@@ -962,8 +962,15 @@ async function loadStudentAssignments(user) {
 
   if (!assignmentsList) return;
 
-  assignmentsList.innerHTML =
-    '<li>Checking assignments...</li>';
+  const projectId =
+    firebase.app().options.projectId;
+
+  assignmentsList.innerHTML = `
+    <li>
+      🔄 Checking assignments...<br>
+      <small>Connected Project: ${projectId}</small>
+    </li>
+  `;
 
   try {
 
@@ -974,8 +981,20 @@ async function loadStudentAssignments(user) {
     assignmentsList.innerHTML = '';
 
     if (snapshot.empty) {
-      assignmentsList.innerHTML =
-        '<li>No assignments exist in Firebase.</li>';
+
+      assignmentsList.innerHTML = `
+        <li>
+          <strong>No assignments found.</strong>
+          <br><br>
+          Firebase Project:
+          <br>
+          <small>${projectId}</small>
+          <br><br>
+          Documents found:
+          <strong>${snapshot.size}</strong>
+        </li>
+      `;
+
       return;
     }
 
@@ -997,8 +1016,7 @@ async function loadStudentAssignments(user) {
 
       found = true;
 
-      const li =
-        document.createElement('li');
+      const li = document.createElement('li');
 
       li.style.marginBottom = '15px';
 
@@ -1007,9 +1025,7 @@ async function loadStudentAssignments(user) {
         <br>
         <span>${data.description || 'No description provided.'}</span>
         <br>
-        <small>
-          📅 Due: ${data.dueDate || 'No due date'}
-        </small>
+        <small>📅 Due: ${data.dueDate || 'No due date'}</small>
       `;
 
       assignmentsList.appendChild(li);
@@ -1026,24 +1042,27 @@ async function loadStudentAssignments(user) {
           <br>
           <small>${user.uid}</small>
           <br><br>
-          Please compare this UID with the
-          <strong>studentUid</strong> in Firestore.
+          Firebase Project:
+          <br>
+          <small>${projectId}</small>
         </li>
       `;
     }
 
   } catch (error) {
 
-    console.error(
-      'Error loading assignments:',
-      error
-    );
+    console.error('Error loading assignments:', error);
 
-    assignmentsList.innerHTML =
-      '<li>Unable to load assignments. Please try again.</li>';
+    assignmentsList.innerHTML = `
+      <li>
+        ❌ Firebase Error
+        <br><br>
+        <small>${error.message}</small>
+      </li>
+    `;
   }
 }
-  
+      
 // ===============================
 // SHOW PORTAL / DASHBOARD
 // ===============================

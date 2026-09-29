@@ -977,26 +977,35 @@ async function loadStudentAssignments(user) {
     const snapshot = await db
   .collection('assignments')
   .get();
+    assignmentsList.innerHTML = `
+  <li>
+    <strong>🔑 Logged-in UID:</strong>
+    <br>
+    <small>${user.uid}</small>
+  </li>
+`;
 
-    assignmentsList.innerHTML = '';
+if (snapshot.empty) {
 
-    if (snapshot.empty) {
+  assignmentsList.innerHTML = `
+    <li>
+      <strong>🔑 Logged-in UID:</strong>
+      <br>
+      <small>${user.uid}</small>
+      <br><br>
+      <strong>No assignments found.</strong>
+      <br><br>
+      Firebase Project:
+      <br>
+      <small>${projectId}</small>
+      <br><br>
+      Documents found:
+      <strong>${snapshot.size}</strong>
+    </li>
+  `;
 
-      assignmentsList.innerHTML = `
-        <li>
-          <strong>No assignments found.</strong>
-          <br><br>
-          Firebase Project:
-          <br>
-          <small>${projectId}</small>
-          <br><br>
-          Documents found:
-          <strong>${snapshot.size}</strong>
-        </li>
-      `;
-
-      return;
-    }
+  return;
+}
 
     let found = false;
 
@@ -1009,6 +1018,15 @@ async function loadStudentAssignments(user) {
 
       const loggedInUid =
         String(user.uid || '').trim();
+      const uidCheck = document.createElement('li');
+
+uidCheck.innerHTML = `
+  <strong>🔑 Logged-in UID:</strong>
+  <br>
+  <small>${loggedInUid}</small>
+`;
+
+assignmentsList.appendChild(uidCheck);
 
       if (assignmentUid !== loggedInUid) {
         return;

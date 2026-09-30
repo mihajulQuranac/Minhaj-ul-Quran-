@@ -974,7 +974,9 @@ async function loadStudentAssignments(user) {
 
   try {
 
-    const snapshot = await firebase.firestore()
+    const snapshot = await db
+  .collection('students')
+  .doc(user.uid)
   .collection('assignments')
   .get();
 

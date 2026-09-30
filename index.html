@@ -962,81 +962,38 @@ async function loadStudentAssignments(user) {
 
   if (!assignmentsList) return;
 
-  const projectId =
-    firebase.app().options.projectId;
-
   assignmentsList.innerHTML = `
-    <li>
-      🔄 Checking assignments...<br>
-      <small>Connected Project: ${projectId}</small>
-    </li>
+    <li>🔄 Loading assignments...</li>
   `;
 
   try {
 
     const snapshot = await db
-  .collection('students')
-  .doc(user.uid)
-  .collection('assignments')
-  .get();
+      .collection('students')
+      .doc(user.uid)
+      .collection('assignments')
+      .get();
 
-console.log("ASSIGNMENTS COUNT:", snapshot.size);
-    assignmentsList.innerHTML = `
-  <li>
-    <strong>🔑 Logged-in UID:</strong>
-    <br>
-    <small>${user.uid}</small>
-  </li>
-`;
+    console.log("ASSIGNMENTS COUNT:", snapshot.size);
 
-if (snapshot.empty) {
+    if (snapshot.empty) {
 
-  assignmentsList.innerHTML = `
-    <li>
-      <strong>🔑 Logged-in UID:</strong>
-      <br>
-      <small>${user.uid}</small>
-      <br><br>
-      <strong>No assignments found.</strong>
-      <br><br>
-      Firebase Project:
-      <br>
-      <small>${projectId}</small>
-      <br><br>
-      Documents found:
-      <strong>${snapshot.size}</strong>
-    </li>
-  `;
+      assignmentsList.innerHTML = `
+        <li>
+          <strong>📭 No assignments found.</strong>
+          <br><br>
+          <small>Student UID: ${user.uid}</small>
+        </li>
+      `;
 
-  return;
-}
+      return;
+    }
 
-    let found = false;
+    assignmentsList.innerHTML = '';
 
     snapshot.forEach((doc) => {
 
       const data = doc.data();
-
-      const assignmentUid =
-        String(data.studentUid || '').trim();
-
-      const loggedInUid =
-        String(user.uid || '').trim();
-      const uidCheck = document.createElement('li');
-
-uidCheck.innerHTML = `
-  <strong>🔑 Logged-in UID:</strong>
-  <br>
-  <small>${loggedInUid}</small>
-`;
-
-assignmentsList.appendChild(uidCheck);
-
-      if (assignmentUid !== loggedInUid) {
-        return;
-      }
-
-      found = true;
 
       const li = document.createElement('li');
 
@@ -1054,23 +1011,6 @@ assignmentsList.appendChild(uidCheck);
 
     });
 
-    if (!found) {
-
-      assignmentsList.innerHTML = `
-        <li>
-          <strong>No matching assignment found.</strong>
-          <br><br>
-          Logged-in Student UID:
-          <br>
-          <small>${user.uid}</small>
-          <br><br>
-          Firebase Project:
-          <br>
-          <small>${projectId}</small>
-        </li>
-      `;
-    }
-
   } catch (error) {
 
     console.error('Error loading assignments:', error);
@@ -1083,7 +1023,10 @@ assignmentsList.appendChild(uidCheck);
       </li>
     `;
   }
-}
+  }
+
+
+ 
       
 // ===============================
 // SHOW PORTAL / DASHBOARD

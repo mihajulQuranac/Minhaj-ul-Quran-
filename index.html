@@ -1185,10 +1185,21 @@ function openModal(id) {
   const modal =
     document.getElementById(id);
 
-  if (modal) {
-    modal.classList.add('show');
+  if (!modal) return;
+
+  modal.classList.add('show');
+
+  // Student Assignments modal open hote hi
+  // Firebase se assignments dobara load karein
+  if (id === 'studentAssignments') {
+
+    const user = auth.currentUser;
+
+    if (user) {
+      loadStudentAssignments(user);
+    }
   }
-}
+  }
 
 function closeModal(id) {
 

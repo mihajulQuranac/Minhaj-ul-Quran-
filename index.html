@@ -166,7 +166,12 @@
   </p>
   <p class="small">Current fee status from your student profile.</p>
       </div>
-      <div class="feature"><h3>🔔 Notifications</h3><div class="notice">Welcome to your Student Portal.</div><div class="notice">Check your schedule before class.</div></div>
+      <div class="feature" id="studentNotifications">
+  <h3>🔔 Notifications</h3>
+  <div id="notificationsList">
+    <div class="notice">🔄 Loading notifications...</div>
+  </div>
+      </div>
       <div class="feature"><h3>💬 Academy Support</h3><p>Need help? Contact us directly.</p><a class="btn whatsapp" href="https://wa.me/923027445729" target="_blank">WhatsApp Support</a></div>
     </div>
   </div>
@@ -941,6 +946,8 @@ if (teacherName) {
   teacherName.textContent =
     `Teacher: ${data.teacher || 'Not Assigned'}`;
   }
+    // Load Firebase notifications
+loadStudentNotifications(user);
   } catch (error) {
 
     console.error(
@@ -950,6 +957,76 @@ if (teacherName) {
 
   }
 }
+  // ===============================
+// LOAD STUDENT NOTIFICATIONS FROM FIRESTORE
+// ===============================
+async function loadStudentNotifications(user) {
+
+  if (!user) return;
+
+  const notificationsList =
+    document.getElementById('notificationsList');
+
+  if (!notificationsList) return;
+
+  notificationsList.innerHTML =
+    '<div class="notice">🔄 Loading notifications...</div>';
+
+  try {
+
+    const snapshot = await db
+      .collection('students')
+      .doc(user.uid)
+      .collection('notifications')
+      .orderBy('createdAt', 'desc')
+      .get();
+
+    if (snapshot.empty) {
+
+      notificationsList.innerHTML =
+        '<div class="notice">📭 No notifications yet.</div>';
+
+      return;
+    }
+
+    notificationsList.innerHTML = '';
+
+    snapshot.forEach((doc) => {
+
+      const data = doc.data();
+
+      const notice =
+        document.createElement('div');
+
+      notice.className = 'notice';
+
+      notice.style.marginBottom = '10px';
+
+      notice.innerHTML = `
+        <strong>
+          ${data.title || 'Notification'}
+        </strong>
+        <br>
+        <span>
+          ${data.message || ''}
+        </span>
+      `;
+
+      notificationsList.appendChild(notice);
+
+    });
+
+  } catch (error) {
+
+    console.error(
+      'Error loading notifications:',
+      error
+    );
+
+    notificationsList.innerHTML =
+      '<div class="notice">⚠️ Unable to load notifications.</div>';
+  }
+  }
   // ===============================
 // LOAD STUDENT ASSIGNMENTS FROM FIRESTORE
 // ===============================

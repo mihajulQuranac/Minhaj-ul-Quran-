@@ -957,7 +957,7 @@ loadStudentNotifications(user);
 
   }
 }
-// ===============================
+ // ===============================
 // LOAD STUDENT NOTIFICATIONS
 // ===============================
 async function loadStudentNotifications(user) {
@@ -968,66 +968,64 @@ async function loadStudentNotifications(user) {
   if (!notificationsList) return;
 
   notificationsList.innerHTML =
-    '<div class="notice">🔄 Firebase project check ho raha hai...</div>';
+    '<div class="notice">🔄 Notifications load ho rahi hain...</div>';
 
   try {
 
-    const projectId = firebase.app().options.projectId;
-
-    const studentRef = firebase
+    const snapshot = await firebase
       .firestore()
       .collection('students')
-      .doc('1K67l24JLGPfBMFpKpEa1LzMBOE2');
-
-    const studentDoc = await studentRef.get();
-
-    const notificationRef = studentRef
+      .doc(user.uid)
       .collection('notifications')
-      .doc('A3FmV3ugxgXIPOqEzsfA');
+      .get();
 
-    const notificationDoc = await notificationRef.get();
+    console.log(
+      'Notifications found:',
+      snapshot.size
+    );
 
-    notificationsList.innerHTML = `
-      <div class="notice">
+    if (snapshot.empty) {
 
-        <strong>🔍 Firebase Diagnostic</strong>
-
-        <br><br>
-
-        <strong>Project ID:</strong>
-        ${projectId}
-
-        <br><br>
-
-        <strong>Student Document:</strong>
-        ${studentDoc.exists ? '✅ Found' : '❌ Not Found'}
-
-        <br><br>
-
-        <strong>Notification Document:</strong>
-        ${notificationDoc.exists ? '✅ Found' : '❌ Not Found'}
-
-        <br><br>
-
-        <strong>Notification Path:</strong>
-        <br>
-        students / 1K67l24JLGPfBMFpKpEa1LzMBOE2 / notifications / A3FmV3ugxXIPOqEzsfA
-
-      </div>
-    `;
-
-    if (notificationDoc.exists) {
-
-      const data = notificationDoc.data();
-
-      notificationsList.innerHTML += `
-        <div class="notice" style="margin-top:10px;">
-          <strong>🔔 ${data.title || 'Notification'}</strong>
-          <br>
-          ${data.message || ''}
+      notificationsList.innerHTML = `
+        <div class="notice">
+          📭 Is student ke liye koi notification nahi mili.
+          <br><br>
+          Student UID:
+          <small>${user.uid}</small>
         </div>
       `;
+
+      return;
     }
+
+    notificationsList.innerHTML = '';
+
+    snapshot.forEach((doc) => {
+
+      const data = doc.data();
+
+      const title =
+        data.title || 'Notification';
+
+      const message =
+        data.message || 'No message';
+
+      const li =
+        document.createElement('div');
+
+      li.className = 'notice';
+
+      li.style.marginBottom = '10px';
+
+      li.innerHTML = `
+        <strong>🔔 ${title}</strong>
+        <br>
+        <span>${message}</span>
+      `;
+
+      notificationsList.appendChild(li);
+
+    });
 
   } catch (error) {
 
@@ -1045,6 +1043,8 @@ async function loadStudentNotifications(user) {
     `;
   }
 }
+
+        
 // ===============================
 // LOAD STUDENT ASSIGNMENTS FROM FIRESTORE
 // ===============================

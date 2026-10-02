@@ -1055,24 +1055,77 @@ async function loadStudentAssignments(user) {
   if (!assignmentsList) return;
 
   assignmentsList.innerHTML = `
-    <li>
-      🔄 Loading assignments...
-    </li>
+    <li>🔄 Loading assignments...</li>
   `;
 
   try {
 
-    // Main assignments collection se assignments load karein
-    // Sirf current student ke assignments
-    const snapshot = await db
+    console.log("STUDENT UID:", user.uid);
+
+    let assignments = [];
+
+    // ==========================================
+    // 1. Check main/root assignments collection
+    // ==========================================
+
+    const mainSnapshot = await db
       .collection('assignments')
       .where('studentUid', '==', user.uid)
       .get();
 
-    console.log('ASSIGNMENTS COUNT:', snapshot.size);
-    console.log('STUDENT UID:', user.uid);
+    mainSnapshot.forEach((doc) => {
 
-    if (snapshot.empty) {
+      assignments.push({
+        id: doc.id,
+        data: doc.data()
+      });
+
+    });
+
+    console.log(
+      "ROOT ASSIGNMENTS:",
+      mainSnapshot.size
+    );
+
+
+    // ==========================================
+    // 2. Also check student's assignments
+    // ==========================================
+
+    const studentSnapshot = await db
+      .collection('students')
+      .doc(user.uid)
+      .collection('assignments')
+      .get();
+
+    studentSnapshot.forEach((doc) => {
+
+      // Duplicate assignment ko dobara add na karein
+      const alreadyExists =
+        assignments.some(item => item.id === doc.id);
+
+      if (!alreadyExists) {
+
+        assignments.push({
+          id: doc.id,
+          data: doc.data()
+        });
+
+      }
+
+    });
+
+    console.log(
+      "STUDENT ASSIGNMENTS:",
+      studentSnapshot.size
+    );
+
+
+    // ==========================================
+    // No assignments
+    // ==========================================
+
+    if (assignments.length === 0) {
 
       assignmentsList.innerHTML = `
         <li>
@@ -1085,23 +1138,34 @@ async function loadStudentAssignments(user) {
       return;
     }
 
+
+    // ==========================================
+    // Display assignments
+    // ==========================================
+
     assignmentsList.innerHTML = '';
 
-    snapshot.forEach((doc) => {
+    assignments.forEach((item) => {
 
-      const data = doc.data();
+      const data = item.data;
 
       const li = document.createElement('li');
 
       li.style.marginBottom = '15px';
 
       li.innerHTML = `
-        <strong>📝 ${data.title || 'Assignment'}</strong>
+        <strong>
+          📝 ${data.title || 'Assignment'}
+        </strong>
+
         <br>
+
         <span>
           ${data.description || 'No description provided.'}
         </span>
+
         <br>
+
         <small>
           📅 Due: ${data.dueDate || 'No due date'}
         </small>
@@ -1111,9 +1175,17 @@ async function loadStudentAssignments(user) {
 
     });
 
+    console.log(
+      "TOTAL ASSIGNMENTS DISPLAYED:",
+      assignments.length
+    );
+
   } catch (error) {
 
-    console.error('Error loading assignments:', error);
+    console.error(
+      'Error loading assignments:',
+      error
+    );
 
     assignmentsList.innerHTML = `
       <li>
@@ -1126,7 +1198,7 @@ async function loadStudentAssignments(user) {
   }
 }
 
-// ===============================
+  // ===============================
 // SHOW PORTAL / DASHBOARD
 // ===============================
 function showPortal(role) {

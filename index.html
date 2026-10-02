@@ -968,49 +968,41 @@ async function loadStudentNotifications(user) {
   if (!notificationsList) return;
 
   notificationsList.innerHTML =
-    '<div class="notice">🔄 Checking Firebase...</div>';
+    '<div class="notice">🔄 Checking notification...</div>';
 
   try {
 
-    // Exact student notification path
-    const snapshot = await db
+    const doc = await db
       .collection('students')
       .doc('1K67l24JLGPfBMFpKpEa1LzMBOE2')
       .collection('notifications')
+      .doc('A3FmV3ugxgXIPOqEzsfA')
       .get();
 
-    if (snapshot.empty) {
+    if (!doc.exists) {
 
       notificationsList.innerHTML = `
         <div class="notice">
-          📭 Firebase connected, but no notification was found.
+          ❌ Notification document not found.
+          <br><br>
+          Firebase path was checked:
+          <br>
+          students / 1K67l24JLGPfBMFpKpEa1LzMBOE2 / notifications / A3FmV3ugxgXIPOqEzsfA
         </div>
       `;
 
       return;
     }
 
-    notificationsList.innerHTML = '';
+    const data = doc.data();
 
-    snapshot.forEach((doc) => {
-
-      const data = doc.data();
-
-      const notice =
-        document.createElement('div');
-
-      notice.className = 'notice';
-      notice.style.marginBottom = '10px';
-
-      notice.innerHTML = `
+    notificationsList.innerHTML = `
+      <div class="notice" style="margin-bottom:10px;">
         <strong>🔔 ${data.title || 'Notification'}</strong>
         <br>
         <span>${data.message || ''}</span>
-      `;
-
-      notificationsList.appendChild(notice);
-
-    });
+      </div>
+    `;
 
   } catch (error) {
 
@@ -1026,9 +1018,11 @@ async function loadStudentNotifications(user) {
         ${error.message}
       </div>
     `;
+  }
+}
 
-  }
-  }
+      
+    
 
   // ===============================
 // LOAD STUDENT ASSIGNMENTS FROM FIRESTORE

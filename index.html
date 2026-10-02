@@ -1062,70 +1062,18 @@ async function loadStudentAssignments(user) {
 
     console.log("STUDENT UID:", user.uid);
 
-    let assignments = [];
-
-    // ==========================================
-    // 1. Check main/root assignments collection
-    // ==========================================
-
-    const mainSnapshot = await db
-      .collection('assignments')
-      .where('studentUid', '==', user.uid)
-      .get();
-
-    mainSnapshot.forEach((doc) => {
-
-      assignments.push({
-        id: doc.id,
-        data: doc.data()
-      });
-
-    });
-
-    console.log(
-      "ROOT ASSIGNMENTS:",
-      mainSnapshot.size
-    );
-
-
-    // ==========================================
-    // 2. Also check student's assignments
-    // ==========================================
-
-    const studentSnapshot = await db
+    const snapshot = await db
       .collection('students')
       .doc(user.uid)
       .collection('assignments')
       .get();
 
-    studentSnapshot.forEach((doc) => {
-
-      // Duplicate assignment ko dobara add na karein
-      const alreadyExists =
-        assignments.some(item => item.id === doc.id);
-
-      if (!alreadyExists) {
-
-        assignments.push({
-          id: doc.id,
-          data: doc.data()
-        });
-
-      }
-
-    });
-
     console.log(
-      "STUDENT ASSIGNMENTS:",
-      studentSnapshot.size
+      "STUDENT ASSIGNMENTS COUNT:",
+      snapshot.size
     );
 
-
-    // ==========================================
-    // No assignments
-    // ==========================================
-
-    if (assignments.length === 0) {
+    if (snapshot.empty) {
 
       assignmentsList.innerHTML = `
         <li>
@@ -1138,16 +1086,17 @@ async function loadStudentAssignments(user) {
       return;
     }
 
-
-    // ==========================================
-    // Display assignments
-    // ==========================================
-
     assignmentsList.innerHTML = '';
 
-    assignments.forEach((item) => {
+    snapshot.forEach((doc) => {
 
-      const data = item.data;
+      const data = doc.data();
+
+      console.log(
+        "ASSIGNMENT:",
+        doc.id,
+        data
+      );
 
       const li = document.createElement('li');
 
@@ -1175,11 +1124,6 @@ async function loadStudentAssignments(user) {
 
     });
 
-    console.log(
-      "TOTAL ASSIGNMENTS DISPLAYED:",
-      assignments.length
-    );
-
   } catch (error) {
 
     console.error(
@@ -1189,7 +1133,7 @@ async function loadStudentAssignments(user) {
 
     assignmentsList.innerHTML = `
       <li>
-        ❌ Unable to load assignments.
+        ❌ Error loading assignments.
         <br><br>
         <small>${error.message}</small>
       </li>
@@ -1197,7 +1141,7 @@ async function loadStudentAssignments(user) {
 
   }
 }
-
+    
   // ===============================
 // SHOW PORTAL / DASHBOARD
 // ===============================

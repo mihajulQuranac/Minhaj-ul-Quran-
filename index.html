@@ -968,65 +968,78 @@ async function loadStudentNotifications(user) {
   if (!notificationsList) return;
 
   notificationsList.innerHTML =
-    '<div class="notice">🔄 Firebase notification test...</div>';
+    '<div class="notice">🔍 Direct Firebase test...</div>';
 
   try {
 
-    const notificationRef = db
+    const projectId =
+      firebase.app().options.projectId;
+
+    const studentRef = db
       .collection('students')
-      .doc(user.uid)
-      .collection('notifications')
-      .doc('websiteTest');
+      .doc(user.uid);
 
-    // Test notification create/update
-    await notificationRef.set({
-      title: 'Welcome',
-      message: 'Welcome to Minhaj ul Quran Academy',
-      type: 'welcome',
-      read: false,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    const studentDoc =
+      await studentRef.get({
+        source: 'server'
+      });
 
-    // Immediately read the same document
-    const testDoc =
+    const notificationRef =
+      studentRef
+        .collection('notifications')
+        .doc('A3FmV3ugxgXIPOqEzsfA');
+
+    const notificationDoc =
       await notificationRef.get({
         source: 'server'
       });
 
-    if (!testDoc.exists) {
-
-      notificationsList.innerHTML = `
-        <div class="notice">
-          ❌ Firebase test document create hua,
-          lekin read nahi ho saka.
-          <br><br>
-          Path:
-          <br>
-          students / ${user.uid} / notifications / websiteTest
-        </div>
-      `;
-
-      return;
-    }
-
-    const data = testDoc.data();
-
     notificationsList.innerHTML = `
       <div class="notice">
-        <strong>🔔 ${data.title}</strong>
-        <br>
-        <span>${data.message}</span>
+
+        <strong>🔍 Firebase Direct Test</strong>
+
         <br><br>
-        <small>
-          ✅ Firebase notification read/write working correctly.
-        </small>
+
+        Project:
+        ${projectId}
+
+        <br><br>
+
+        Student:
+        ${studentDoc.exists ? '✅ Found' : '❌ Not Found'}
+
+        <br><br>
+
+        Notification:
+        ${notificationDoc.exists ? '✅ Found' : '❌ Not Found'}
+
+        <br><br>
+
+        Path:
+        ${notificationRef.path}
+
       </div>
     `;
+
+    if (notificationDoc.exists) {
+
+      const data =
+        notificationDoc.data();
+
+      notificationsList.innerHTML += `
+        <div class="notice" style="margin-top:10px;">
+          <strong>🔔 ${data.title || 'Notification'}</strong>
+          <br>
+          ${data.message || ''}
+        </div>
+      `;
+    }
 
   } catch (error) {
 
     console.error(
-      'Notification Firebase test error:',
+      'Notification test error:',
       error
     );
 
@@ -1034,7 +1047,9 @@ async function loadStudentNotifications(user) {
       <div class="notice">
         ❌ Firebase Error:
         <br><br>
-        ${error.message}
+        ${error.code || ''}
+        <br>
+        ${error.message || ''}
       </div>
     `;
   }

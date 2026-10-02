@@ -957,7 +957,7 @@ loadStudentNotifications(user);
 
   }
 }
- // ===============================
+// ===============================
 // LOAD STUDENT NOTIFICATIONS
 // ===============================
 async function loadStudentNotifications(user) {
@@ -968,19 +968,28 @@ async function loadStudentNotifications(user) {
   if (!notificationsList) return;
 
   notificationsList.innerHTML =
-    '<div class="notice">🔄 Notifications load ho rahi hain...</div>';
+    '<div class="notice">🔄 Server سے notifications load ہو رہی ہیں...</div>';
 
   try {
 
-    const snapshot = await firebase
-      .firestore()
-      .collection('students')
-      .doc(user.uid)
-      .collection('notifications')
-      .get();
+    const firestore =
+      firebase.firestore();
+
+    const studentRef =
+      firestore
+        .collection('students')
+        .doc(user.uid);
+
+    // Force Firestore to read fresh data from server
+    const snapshot =
+      await studentRef
+        .collection('notifications')
+        .get({
+          source: 'server'
+        });
 
     console.log(
-      'Notifications found:',
+      'Server notifications:',
       snapshot.size
     );
 
@@ -988,10 +997,10 @@ async function loadStudentNotifications(user) {
 
       notificationsList.innerHTML = `
         <div class="notice">
-          📭 Is student ke liye koi notification nahi mili.
+          📭 Server پر بھی notification نہیں ملی۔
           <br><br>
-          Student UID:
-          <small>${user.uid}</small>
+          UID:
+          ${user.uid}
         </div>
       `;
 
@@ -1004,26 +1013,20 @@ async function loadStudentNotifications(user) {
 
       const data = doc.data();
 
-      const title =
-        data.title || 'Notification';
-
-      const message =
-        data.message || 'No message';
-
-      const li =
+      const notification =
         document.createElement('div');
 
-      li.className = 'notice';
+      notification.className = 'notice';
 
-      li.style.marginBottom = '10px';
+      notification.style.marginBottom = '10px';
 
-      li.innerHTML = `
-        <strong>🔔 ${title}</strong>
+      notification.innerHTML = `
+        <strong>🔔 ${data.title || 'Notification'}</strong>
         <br>
-        <span>${message}</span>
+        <span>${data.message || ''}</span>
       `;
 
-      notificationsList.appendChild(li);
+      notificationsList.appendChild(notification);
 
     });
 
@@ -1043,9 +1046,7 @@ async function loadStudentNotifications(user) {
     `;
   }
 }
-
-        
-// ===============================
+  // ===============================
 // LOAD STUDENT ASSIGNMENTS FROM FIRESTORE
 // ===============================
 async function loadStudentAssignments(user) {

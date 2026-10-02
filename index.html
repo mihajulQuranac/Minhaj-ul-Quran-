@@ -970,13 +970,10 @@ async function loadStudentNotifications(user) {
     '<div class="notice">🔄 Loading notifications...</div>';
 
   try {
-    // Student reference
     const studentRef = db
       .collection('students')
       .doc(user.uid);
 
-    // IMPORTANT:
-    // Firebase collection name has a space at the end
     const snapshot = await studentRef
       .collection('notifications ')
       .get();
@@ -993,20 +990,37 @@ async function loadStudentNotifications(user) {
     notificationsList.innerHTML = '';
 
     snapshot.forEach((doc) => {
-      const data = doc.data();
 
-      const notification = document.createElement('div');
+      const rawData = doc.data();
+
+      // Field names کے extra spaces خود ختم کریں
+      const data = {};
+
+      Object.keys(rawData).forEach((key) => {
+        data[key.trim()] = rawData[key];
+      });
+
+      const title =
+        data.title ||
+        data.Title ||
+        'Notification';
+
+      const message =
+        data.message ||
+        data.Message ||
+        data.text ||
+        data.Text ||
+        'No message';
+
+      const notification =
+        document.createElement('div');
 
       notification.className = 'notice';
 
       notification.innerHTML = `
-        <strong>
-          🔔 ${data.title || 'Notification'}
-        </strong>
+        <strong>🔔 ${title}</strong>
         <br>
-        <span>
-          ${data.message || 'No message'}
-        </span>
+        <span>${message}</span>
       `;
 
       notificationsList.appendChild(notification);
@@ -1028,7 +1042,7 @@ async function loadStudentNotifications(user) {
     `;
   }
 }
-       // ===============================
+     // ===============================
 // LOAD STUDENT ASSIGNMENTS FROM FIRESTORE
 // ===============================
 async function loadStudentAssignments(user) {

@@ -968,28 +968,16 @@ async function loadStudentNotifications(user) {
   if (!notificationsList) return;
 
   notificationsList.innerHTML =
-    '<div class="notice">🔄 Server سے notifications load ہو رہی ہیں...</div>';
+    '<div class="notice">🔍 Firebase میں notification search ہو رہی ہے...</div>';
 
   try {
 
-    const firestore =
-      firebase.firestore();
-
-    const studentRef =
-      firestore
-        .collection('students')
-        .doc(user.uid);
-
-    // Force Firestore to read fresh data from server
-    const snapshot =
-      await studentRef
-        .collection('notifications')
-        .get({
-          source: 'server'
-        });
+    const snapshot = await db
+      .collectionGroup('notifications')
+      .get();
 
     console.log(
-      'Server notifications:',
+      'ALL NOTIFICATIONS FOUND:',
       snapshot.size
     );
 
@@ -997,9 +985,9 @@ async function loadStudentNotifications(user) {
 
       notificationsList.innerHTML = `
         <div class="notice">
-          📭 Server پر بھی notification نہیں ملی۔
+          📭 Firebase میں "notifications" collection کا کوئی document نہیں ملا۔
           <br><br>
-          UID:
+          Student UID:
           ${user.uid}
         </div>
       `;
@@ -1007,28 +995,63 @@ async function loadStudentNotifications(user) {
       return;
     }
 
+    let foundForStudent = false;
+
     notificationsList.innerHTML = '';
 
     snapshot.forEach((doc) => {
 
+      console.log(
+        'Notification path:',
+        doc.ref.path
+      );
+
       const data = doc.data();
 
-      const notification =
-        document.createElement('div');
+      // صرف موجودہ student کی notification دکھائیں
+      if (
+        doc.ref.path.includes(
+          `students/${user.uid}/notifications/`
+        )
+      ) {
 
-      notification.className = 'notice';
+        foundForStudent = true;
 
-      notification.style.marginBottom = '10px';
+        const notification =
+          document.createElement('div');
 
-      notification.innerHTML = `
-        <strong>🔔 ${data.title || 'Notification'}</strong>
-        <br>
-        <span>${data.message || ''}</span>
-      `;
+        notification.className = 'notice';
 
-      notificationsList.appendChild(notification);
+        notification.style.marginBottom = '10px';
+
+        notification.innerHTML = `
+          <strong>🔔 ${data.title || 'Notification'}</strong>
+          <br>
+          <span>${data.message || 'No message'}</span>
+        `;
+
+        notificationsList.appendChild(
+          notification
+        );
+      }
 
     });
+
+    if (!foundForStudent) {
+
+      notificationsList.innerHTML = `
+        <div class="notice">
+          ⚠️ "notifications" collection ملی،
+          لیکن یہ notification اس student کے UID سے match نہیں ہوئی۔
+          <br><br>
+          Student UID:
+          ${user.uid}
+          <br><br>
+          Total notifications found:
+          ${snapshot.size}
+        </div>
+      `;
+    }
 
   } catch (error) {
 
@@ -1045,7 +1068,8 @@ async function loadStudentNotifications(user) {
       </div>
     `;
   }
-}
+}   
+        
   // ===============================
 // LOAD STUDENT ASSIGNMENTS FROM FIRESTORE
 // ===============================

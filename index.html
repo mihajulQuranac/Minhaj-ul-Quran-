@@ -961,101 +961,74 @@ loadStudentNotifications(user);
 // LOAD STUDENT NOTIFICATIONS
 // ===============================
 async function loadStudentNotifications(user) {
-
   const notificationsList =
     document.getElementById('notificationsList');
 
   if (!notificationsList) return;
 
   notificationsList.innerHTML =
-    '<div class="notice">🔍 Direct Firebase test...</div>';
+    '<div class="notice">🔄 Loading notifications...</div>';
 
   try {
-
-    const projectId =
-      firebase.app().options.projectId;
-
+    // Student reference
     const studentRef = db
       .collection('students')
       .doc(user.uid);
 
-    const studentDoc =
-      await studentRef.get({
-        source: 'server'
-      });
+    // IMPORTANT:
+    // Firebase collection name has a space at the end
+    const snapshot = await studentRef
+      .collection('notifications ')
+      .get();
 
-    const notificationRef =
-      studentRef
-        .collection('notifications ')
-        .doc('A3FmV3ugxgXIPOqEzsfA');
-
-    const notificationDoc =
-      await notificationRef.get({
-        source: 'server'
-      });
-
-    notificationsList.innerHTML = `
-      <div class="notice">
-
-        <strong>🔍 Firebase Direct Test</strong>
-
-        <br><br>
-
-        Project:
-        ${projectId}
-
-        <br><br>
-
-        Student:
-        ${studentDoc.exists ? '✅ Found' : '❌ Not Found'}
-
-        <br><br>
-
-        Notification:
-        ${notificationDoc.exists ? '✅ Found' : '❌ Not Found'}
-
-        <br><br>
-
-        Path:
-        ${notificationRef.path}
-
-      </div>
-    `;
-
-    if (notificationDoc.exists) {
-
-      const data =
-        notificationDoc.data();
-
-      notificationsList.innerHTML += `
-        <div class="notice" style="margin-top:10px;">
-          <strong>🔔 ${data.title || 'Notification'}</strong>
-          <br>
-          ${data.message || ''}
+    if (snapshot.empty) {
+      notificationsList.innerHTML = `
+        <div class="notice">
+          📭 No notifications found.
         </div>
       `;
+      return;
     }
+
+    notificationsList.innerHTML = '';
+
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+
+      const notification = document.createElement('div');
+
+      notification.className = 'notice';
+
+      notification.innerHTML = `
+        <strong>
+          🔔 ${data.title || 'Notification'}
+        </strong>
+        <br>
+        <span>
+          ${data.message || 'No message'}
+        </span>
+      `;
+
+      notificationsList.appendChild(notification);
+    });
 
   } catch (error) {
 
     console.error(
-      'Notification test error:',
+      'Notification Error:',
       error
     );
 
     notificationsList.innerHTML = `
       <div class="notice">
-        ❌ Firebase Error:
+        ❌ Failed to load notifications.
         <br><br>
-        ${error.code || ''}
-        <br>
-        ${error.message || ''}
+        <small>${error.message}</small>
       </div>
     `;
   }
 }
-
-  // ===============================
+       // ===============================
 // LOAD STUDENT ASSIGNMENTS FROM FIRESTORE
 // ===============================
 async function loadStudentAssignments(user) {

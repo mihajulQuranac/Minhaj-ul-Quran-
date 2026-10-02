@@ -958,7 +958,7 @@ loadStudentNotifications(user);
   }
 }
 // ===============================
-// LOAD STUDENT NOTIFICATIONS FROM FIRESTORE
+// LOAD STUDENT NOTIFICATIONS
 // ===============================
 async function loadStudentNotifications(user) {
 
@@ -974,15 +974,11 @@ async function loadStudentNotifications(user) {
 
   try {
 
-    console.log("Logged-in UID:", user.uid);
-
     const snapshot = await db
       .collection('students')
       .doc(user.uid)
       .collection('notifications')
       .get();
-
-    console.log("Notifications found:", snapshot.size);
 
     if (snapshot.empty) {
 
@@ -998,17 +994,14 @@ async function loadStudentNotifications(user) {
 
       const data = doc.data();
 
-      console.log("Notification:", doc.id, data);
-
       const notice =
         document.createElement('div');
 
       notice.className = 'notice';
-
       notice.style.marginBottom = '10px';
 
       notice.innerHTML = `
-        <strong>${data.title || 'Notification'}</strong>
+        <strong>🔔 ${data.title || 'Notification'}</strong>
         <br>
         <span>${data.message || ''}</span>
       `;
@@ -1024,10 +1017,14 @@ async function loadStudentNotifications(user) {
       error
     );
 
-    notificationsList.innerHTML =
-      '<div class="notice">⚠️ Unable to load notifications.</div>';
+    notificationsList.innerHTML = `
+      <div class="notice">
+        ⚠️ Unable to load notifications.
+      </div>
+    `;
+
   }
-  }  
+}
 
   // ===============================
 // LOAD STUDENT ASSIGNMENTS FROM FIRESTORE

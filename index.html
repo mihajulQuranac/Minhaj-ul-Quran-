@@ -979,6 +979,8 @@ async function loadStudentNotifications(user) {
       .doc(user.uid)
       .collection('notifications')
       .get();
+    console.log("USER UID:", user.uid);
+console.log("NOTIFICATION COUNT:", snapshot.size);
 
     if (snapshot.empty) {
 

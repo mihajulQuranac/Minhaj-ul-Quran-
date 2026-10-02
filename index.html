@@ -968,41 +968,66 @@ async function loadStudentNotifications(user) {
   if (!notificationsList) return;
 
   notificationsList.innerHTML =
-    '<div class="notice">🔄 Checking notification...</div>';
+    '<div class="notice">🔄 Firebase project check ho raha hai...</div>';
 
   try {
 
-    const doc = await db
+    const projectId = firebase.app().options.projectId;
+
+    const studentRef = firebase
+      .firestore()
       .collection('students')
-      .doc('1K67l24JLGPfBMFpKpEa1LzMBOE2')
+      .doc('1K67l24JLGPfBMFpKpEa1LzMBOE2');
+
+    const studentDoc = await studentRef.get();
+
+    const notificationRef = studentRef
       .collection('notifications')
-      .doc('A3FmV3ugxgXIPOqEzsfA')
-      .get();
+      .doc('A3FmV3ugxgXIPOqEzsfA');
 
-    if (!doc.exists) {
-
-      notificationsList.innerHTML = `
-        <div class="notice">
-          ❌ Notification document not found.
-          <br><br>
-          Firebase path was checked:
-          <br>
-          students / 1K67l24JLGPfBMFpKpEa1LzMBOE2 / notifications / A3FmV3ugxgXIPOqEzsfA
-        </div>
-      `;
-
-      return;
-    }
-
-    const data = doc.data();
+    const notificationDoc = await notificationRef.get();
 
     notificationsList.innerHTML = `
-      <div class="notice" style="margin-bottom:10px;">
-        <strong>🔔 ${data.title || 'Notification'}</strong>
+      <div class="notice">
+
+        <strong>🔍 Firebase Diagnostic</strong>
+
+        <br><br>
+
+        <strong>Project ID:</strong>
+        ${projectId}
+
+        <br><br>
+
+        <strong>Student Document:</strong>
+        ${studentDoc.exists ? '✅ Found' : '❌ Not Found'}
+
+        <br><br>
+
+        <strong>Notification Document:</strong>
+        ${notificationDoc.exists ? '✅ Found' : '❌ Not Found'}
+
+        <br><br>
+
+        <strong>Notification Path:</strong>
         <br>
-        <span>${data.message || ''}</span>
+        students / 1K67l24JLGPfBMFpKpEa1LzMBOE2 / notifications / A3FmV3ugxXIPOqEzsfA
+
       </div>
     `;
+
+    if (notificationDoc.exists) {
+
+      const data = notificationDoc.data();
+
+      notificationsList.innerHTML += `
+        <div class="notice" style="margin-top:10px;">
+          <strong>🔔 ${data.title || 'Notification'}</strong>
+          <br>
+          ${data.message || ''}
+        </div>
+      `;
+    }
 
   } catch (error) {
 
@@ -1014,17 +1039,13 @@ async function loadStudentNotifications(user) {
     notificationsList.innerHTML = `
       <div class="notice">
         ❌ Firebase Error:
-        <br>
+        <br><br>
         ${error.message}
       </div>
     `;
   }
 }
-
-      
-    
-
-  // ===============================
+// ===============================
 // LOAD STUDENT ASSIGNMENTS FROM FIRESTORE
 // ===============================
 async function loadStudentAssignments(user) {

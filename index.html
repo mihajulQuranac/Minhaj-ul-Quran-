@@ -962,30 +962,30 @@ loadStudentNotifications(user);
 // ===============================
 async function loadStudentNotifications(user) {
 
-  if (!user) return;
-
   const notificationsList =
     document.getElementById('notificationsList');
 
   if (!notificationsList) return;
 
   notificationsList.innerHTML =
-    '<div class="notice">🔄 Loading notifications...</div>';
+    '<div class="notice">🔄 Checking Firebase...</div>';
 
   try {
 
+    // Exact student notification path
     const snapshot = await db
       .collection('students')
-      .doc(user.uid)
+      .doc('1K67l24JLGPfBMFpKpEa1LzMBOE2')
       .collection('notifications')
       .get();
-    console.log("USER UID:", user.uid);
-console.log("NOTIFICATION COUNT:", snapshot.size);
 
     if (snapshot.empty) {
 
-      notificationsList.innerHTML =
-        '<div class="notice">📭 No notifications yet.</div>';
+      notificationsList.innerHTML = `
+        <div class="notice">
+          📭 Firebase connected, but no notification was found.
+        </div>
+      `;
 
       return;
     }
@@ -1015,18 +1015,20 @@ console.log("NOTIFICATION COUNT:", snapshot.size);
   } catch (error) {
 
     console.error(
-      'Error loading notifications:',
+      'Notification Firebase error:',
       error
     );
 
     notificationsList.innerHTML = `
       <div class="notice">
-        ⚠️ Unable to load notifications.
+        ❌ Firebase Error:
+        <br>
+        ${error.message}
       </div>
     `;
 
   }
-}
+  }
 
   // ===============================
 // LOAD STUDENT ASSIGNMENTS FROM FIRESTORE

@@ -968,95 +968,65 @@ async function loadStudentNotifications(user) {
   if (!notificationsList) return;
 
   notificationsList.innerHTML =
-    '<div class="notice">🔍 Firebase میں notification search ہو رہی ہے...</div>';
+    '<div class="notice">🔄 Firebase notification test...</div>';
 
   try {
 
-    const snapshot = await db
-      .collectionGroup('notifications')
-      .get();
+    const notificationRef = db
+      .collection('students')
+      .doc(user.uid)
+      .collection('notifications')
+      .doc('websiteTest');
 
-    console.log(
-      'ALL NOTIFICATIONS FOUND:',
-      snapshot.size
-    );
+    // Test notification create/update
+    await notificationRef.set({
+      title: 'Welcome',
+      message: 'Welcome to Minhaj ul Quran Academy',
+      type: 'welcome',
+      read: false,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
 
-    if (snapshot.empty) {
+    // Immediately read the same document
+    const testDoc =
+      await notificationRef.get({
+        source: 'server'
+      });
+
+    if (!testDoc.exists) {
 
       notificationsList.innerHTML = `
         <div class="notice">
-          📭 Firebase میں "notifications" collection کا کوئی document نہیں ملا۔
+          ❌ Firebase test document create hua,
+          lekin read nahi ho saka.
           <br><br>
-          Student UID:
-          ${user.uid}
+          Path:
+          <br>
+          students / ${user.uid} / notifications / websiteTest
         </div>
       `;
 
       return;
     }
 
-    let foundForStudent = false;
+    const data = testDoc.data();
 
-    notificationsList.innerHTML = '';
-
-    snapshot.forEach((doc) => {
-
-      console.log(
-        'Notification path:',
-        doc.ref.path
-      );
-
-      const data = doc.data();
-
-      // صرف موجودہ student کی notification دکھائیں
-      if (
-        doc.ref.path.includes(
-          `students/${user.uid}/notifications/`
-        )
-      ) {
-
-        foundForStudent = true;
-
-        const notification =
-          document.createElement('div');
-
-        notification.className = 'notice';
-
-        notification.style.marginBottom = '10px';
-
-        notification.innerHTML = `
-          <strong>🔔 ${data.title || 'Notification'}</strong>
-          <br>
-          <span>${data.message || 'No message'}</span>
-        `;
-
-        notificationsList.appendChild(
-          notification
-        );
-      }
-
-    });
-
-    if (!foundForStudent) {
-
-      notificationsList.innerHTML = `
-        <div class="notice">
-          ⚠️ "notifications" collection ملی،
-          لیکن یہ notification اس student کے UID سے match نہیں ہوئی۔
-          <br><br>
-          Student UID:
-          ${user.uid}
-          <br><br>
-          Total notifications found:
-          ${snapshot.size}
-        </div>
-      `;
-    }
+    notificationsList.innerHTML = `
+      <div class="notice">
+        <strong>🔔 ${data.title}</strong>
+        <br>
+        <span>${data.message}</span>
+        <br><br>
+        <small>
+          ✅ Firebase notification read/write working correctly.
+        </small>
+      </div>
+    `;
 
   } catch (error) {
 
     console.error(
-      'Notification Firebase error:',
+      'Notification Firebase test error:',
       error
     );
 
@@ -1068,8 +1038,8 @@ async function loadStudentNotifications(user) {
       </div>
     `;
   }
-}   
-        
+}
+
   // ===============================
 // LOAD STUDENT ASSIGNMENTS FROM FIRESTORE
 // ===============================

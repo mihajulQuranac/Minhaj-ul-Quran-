@@ -1055,18 +1055,22 @@ async function loadStudentAssignments(user) {
   if (!assignmentsList) return;
 
   assignmentsList.innerHTML = `
-    <li>🔄 Loading assignments...</li>
+    <li>
+      🔄 Loading assignments...
+    </li>
   `;
 
   try {
 
+    // Main assignments collection se assignments load karein
+    // Sirf current student ke assignments
     const snapshot = await db
-      .collection('students')
-      .doc(user.uid)
       .collection('assignments')
+      .where('studentUid', '==', user.uid)
       .get();
 
-    console.log("ASSIGNMENTS COUNT:", snapshot.size);
+    console.log('ASSIGNMENTS COUNT:', snapshot.size);
+    console.log('STUDENT UID:', user.uid);
 
     if (snapshot.empty) {
 
@@ -1094,9 +1098,13 @@ async function loadStudentAssignments(user) {
       li.innerHTML = `
         <strong>📝 ${data.title || 'Assignment'}</strong>
         <br>
-        <span>${data.description || 'No description provided.'}</span>
+        <span>
+          ${data.description || 'No description provided.'}
+        </span>
         <br>
-        <small>📅 Due: ${data.dueDate || 'No due date'}</small>
+        <small>
+          📅 Due: ${data.dueDate || 'No due date'}
+        </small>
       `;
 
       assignmentsList.appendChild(li);
@@ -1109,17 +1117,15 @@ async function loadStudentAssignments(user) {
 
     assignmentsList.innerHTML = `
       <li>
-        ❌ Firebase Error
+        ❌ Unable to load assignments.
         <br><br>
         <small>${error.message}</small>
       </li>
     `;
-  }
-  }
 
+  }
+}
 
- 
-      
 // ===============================
 // SHOW PORTAL / DASHBOARD
 // ===============================

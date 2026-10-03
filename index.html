@@ -1050,89 +1050,77 @@ async function loadStudentAssignments(user) {
 
   if (!list) return;
 
-  list.innerHTML = "🔍 Searching all assignments...";
+  list.innerHTML = "🔍 Direct assignment test...";
 
   try {
-    const uid = String(user.uid).trim();
+    const uid = user.uid;
 
-    const snapshot = await db
-      .collectionGroup("assignments")
-      .get();
+    const ref = db
+      .collection("students")
+      .doc(uid)
+      .collection("assignments")
+      .doc("9Krm8BMUqNDQOmq7DCFB");
 
-    console.log("ALL ASSIGNMENTS FOUND:", snapshot.size);
+    const doc = await ref.get();
 
-    let html = `
-      <div style="padding:12px;background:#f5f5f5;border-radius:8px;">
-        <strong>Assignment Search Test</strong><br>
-        Student UID: ${uid}<br>
-        All assignments found: ${snapshot.size}
-      </div>
-      <br>
-    `;
+    console.log("DIRECT ASSIGNMENT EXISTS:", doc.exists);
+    console.log("DIRECT ASSIGNMENT DATA:", doc.data());
 
-    let matched = 0;
-
-    snapshot.forEach((doc) => {
-      const data = doc.data();
-
-      console.log("Assignment:", doc.id, data);
-
-      if (
-        String(data.studentUid || "").trim() !== uid
-      ) {
-        return;
-      }
-
-      matched++;
-
-      html += `
-        <div style="
-          padding:15px;
-          margin-bottom:12px;
-          border:1px solid #ddd;
-          border-radius:10px;
-          background:white;
-        ">
-          <h4>📝 ${data.title || "Assignment"}</h4>
-
-          <p>
-            ${data.description || "No description"}
-          </p>
-
-          <p>
-            📅 Due Date:
-            ${data.dueDate || "Not specified"}
-          </p>
-
-          <small>
-            Document ID: ${doc.id}
-          </small>
-        </div>
-      `;
-    });
-
-    if (matched === 0) {
-      html += `
+    if (!doc.exists) {
+      list.innerHTML = `
         <div class="notice">
-          ❌ No assignment matched this Student UID.
+          ❌ Direct document not found.
+          <br><br>
+          Path checked:
+          <br>
+          students/${uid}/assignments/9Krm8BMUqNDQOmq7DCFB
         </div>
       `;
+      return;
     }
 
-    list.innerHTML = html;
+    const data = doc.data();
+
+    list.innerHTML = `
+      <div style="
+        padding:15px;
+        border:1px solid #ddd;
+        border-radius:10px;
+        background:white;
+      ">
+        <h3>📝 ${data.title || "Assignment"}</h3>
+
+        <p>
+          ${data.description || "No description"}
+        </p>
+
+        <p>
+          📅 Due Date:
+          <strong>${data.dueDate || "Not specified"}</strong>
+        </p>
+
+        <p>
+          🆔 ${doc.id}
+        </p>
+      </div>
+    `;
 
   } catch (error) {
-    console.error("ASSIGNMENT SEARCH ERROR:", error);
+    console.error("DIRECT ASSIGNMENT ERROR:", error);
 
     list.innerHTML = `
       <div class="notice">
-        ❌ ${error.message}
+        ❌ Firebase Error
+        <br><br>
+        ${error.code || ""}
+        <br>
+        ${error.message || ""}
       </div>
     `;
   }
 }
 
-  // ===============================
+ // ===============================
 // SHOW PORTAL / DASHBOARD
 // ===============================
 function showPortal(role) {

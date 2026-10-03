@@ -1050,62 +1050,119 @@ async function loadStudentNotifications(user) {
 
   if (!list) return;
 
+  list.innerHTML = "🔍 Firebase final test...";
+
   try {
     const uid = user.uid;
-
     const assignmentId = "gmXCva6bKqyjJRNWB3wM";
 
+    // Student path
     const studentRef = db
       .collection("students")
       .doc(uid);
 
-    const assignmentsRef = studentRef
+    // Student assignments path
+    const studentAssignmentsRef = studentRef
       .collection("assignments");
 
-    const assignmentRef = assignmentsRef
+    // Exact assignment
+    const exactAssignmentRef = studentAssignmentsRef
       .doc(assignmentId);
 
+    // Root assignments collection
+    const rootAssignmentsRef = db
+      .collection("assignments");
+
+    // Force fresh server reads
     const studentSnap = await studentRef.get({
       source: "server"
     });
 
-    const assignmentsSnap = await assignmentsRef.get({
-      source: "server"
-    });
+    const studentAssignmentsSnap =
+      await studentAssignmentsRef.get({
+        source: "server"
+      });
 
-    const assignmentSnap = await assignmentRef.get({
-      source: "server"
-    });
+    const exactAssignmentSnap =
+      await exactAssignmentRef.get({
+        source: "server"
+      });
 
-    console.log("========== ASSIGNMENT DEBUG ==========");
+    const rootAssignmentsSnap =
+      await rootAssignmentsRef.get({
+        source: "server"
+      });
+
+    console.log("========== FINAL FIREBASE TEST ==========");
     console.log("Project:", firebase.app().options.projectId);
     console.log("UID:", uid);
-    console.log("Student path:", studentRef.path);
-    console.log("Assignments path:", assignmentsRef.path);
-    console.log("Assignment path:", assignmentRef.path);
-    console.log("Student exists:", studentSnap.exists);
-    console.log("Assignments count:", assignmentsSnap.size);
-    console.log("Target assignment exists:", assignmentSnap.exists);
 
-    let allDocs = "";
+    console.log(
+      "Student path:",
+      studentRef.path
+    );
 
-    assignmentsSnap.forEach(doc => {
-      allDocs += `
-        <div style="margin-top:8px;">
-          📄 Document ID: <strong>${doc.id}</strong>
+    console.log(
+      "Student assignments path:",
+      studentAssignmentsRef.path
+    );
+
+    console.log(
+      "Exact assignment path:",
+      exactAssignmentRef.path
+    );
+
+    console.log(
+      "Student exists:",
+      studentSnap.exists
+    );
+
+    console.log(
+      "Student assignments:",
+      studentAssignmentsSnap.size
+    );
+
+    console.log(
+      "Exact assignment:",
+      exactAssignmentSnap.exists
+    );
+
+    console.log(
+      "Root assignments:",
+      rootAssignmentsSnap.size
+    );
+
+    // Documents inside student assignments
+    let studentDocs = "";
+
+    studentAssignmentsSnap.forEach(doc => {
+      studentDocs += `
+        <div>
+          📄 ${doc.id}
+        </div>
+      `;
+    });
+
+    // Documents inside root assignments
+    let rootDocs = "";
+
+    rootAssignmentsSnap.forEach(doc => {
+      rootDocs += `
+        <div>
+          📄 ${doc.id}
         </div>
       `;
     });
 
     list.innerHTML = `
       <div style="
-        padding:15px;
-        line-height:1.8;
+        padding:16px;
         border:1px solid #ddd;
         border-radius:12px;
+        line-height:1.8;
       ">
 
-        <h3>🔍 Firebase Assignment Debug</h3>
+        <h3>🔍 Final Firebase Test</h3>
 
         <strong>Project:</strong><br>
         ${firebase.app().options.projectId}
@@ -1117,48 +1174,71 @@ async function loadStudentNotifications(user) {
 
         <br><br>
 
-        <strong>Student Path:</strong><br>
-        ${studentRef.path}
-
-        <br><br>
-
-        <strong>Assignments Path:</strong><br>
-        ${assignmentsRef.path}
-
-        <br><br>
-
-        <strong>Exact Assignment Path:</strong><br>
-        ${assignmentRef.path}
-
-        <br><br>
-
-        <strong>Student:</strong>
+        <strong>Student Document:</strong>
         ${studentSnap.exists ? "✅ Found" : "❌ Not Found"}
 
         <br>
 
-        <strong>Assignments Found:</strong>
-        ${assignmentsSnap.size}
+        <strong>Student Assignments:</strong>
+        ${studentAssignmentsSnap.size}
 
         <br>
 
-        <strong>Target Assignment:</strong>
-        ${assignmentSnap.exists ? "✅ Found" : "❌ Not Found"}
+        <strong>Exact Assignment:</strong>
+        ${exactAssignmentSnap.exists ? "✅ Found" : "❌ Not Found"}
 
-        ${allDocs}
+        <br>
+
+        <strong>Root Assignments:</strong>
+        ${rootAssignmentsSnap.size}
+
+        <hr>
+
+        <strong>Student Assignments Path:</strong><br>
+        ${studentAssignmentsRef.path}
+
+        <br><br>
+
+        <strong>Exact Assignment Path:</strong><br>
+        ${exactAssignmentRef.path}
+
+        <hr>
+
+        <strong>Student Assignment Documents:</strong>
+        ${studentDocs || "📭 None"}
+
+        <br><br>
+
+        <strong>Root Assignment Documents:</strong>
+        ${rootDocs || "📭 None"}
 
       </div>
     `;
 
   } catch (error) {
 
-    console.error("ASSIGNMENT ERROR:", error);
+    console.error(
+      "FINAL FIREBASE ERROR:",
+      error
+    );
 
     list.innerHTML = `
-      <div style="padding:15px;">
+      <div style="
+        padding:16px;
+        border:1px solid #ffaaaa;
+        border-radius:12px;
+      ">
+
         <h3>🔥 Firebase Error</h3>
-        <strong>Code:</strong> ${error.code || "Unknown"}<br>
-        <strong>Message:</strong> ${error.message || error}
+
+        <strong>Code:</strong>
+        ${error.code || "Unknown"}
+
+        <br>
+
+        <strong>Message:</strong>
+        ${error.message || error}
+
       </div>
     `;
   }

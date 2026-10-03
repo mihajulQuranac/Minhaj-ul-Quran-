@@ -1046,103 +1046,88 @@ async function loadStudentNotifications(user) {
 // LOAD STUDENT ASSIGNMENTS FROM FIRESTORE
 // ===============================
 async function loadStudentAssignments(user) {
+  const list = document.getElementById("studentAssignmentsList");
 
-  if (!user) return;
+  if (!list) return;
 
-  const assignmentsList =
-    document.getElementById('studentAssignmentsList');
-
-  if (!assignmentsList) return;
-
-  assignmentsList.innerHTML = `
-    <li>🔄 Loading assignments...</li>
-  `;
+  list.innerHTML = "🔄 Loading assignments...";
 
   try {
+    console.log("ASSIGNMENTS: Checking root collection");
+    console.log("Student UID:", user.uid);
 
-    console.log("STUDENT UID:", user.uid);
+    const snapshot = await db.collection("assignments").get();
 
-    const snapshot = await db
-      .collection('students')
-      .doc(user.uid)
-      .collection('assignments')
-      .get();
+    console.log("ASSIGNMENTS COUNT:", snapshot.size);
 
-    console.log(
-      "STUDENT ASSIGNMENTS COUNT:",
-      snapshot.size
-    );
-
-    if (snapshot.empty) {
-
-      assignmentsList.innerHTML = `
-        <li>
-          <strong>📭 No assignments found.</strong>
-          <br><br>
-          <small>Student UID: ${user.uid}</small>
-        </li>
-      `;
-
-      return;
-    }
-
-    assignmentsList.innerHTML = '';
+    let found = 0;
+    list.innerHTML = "";
 
     snapshot.forEach((doc) => {
-
       const data = doc.data();
 
-      console.log(
-        "ASSIGNMENT:",
-        doc.id,
-        data
-      );
+      console.log("Assignment:", doc.id, data);
 
-      const li = document.createElement('li');
+      // Sirf isi student ke assignments
+      if (String(data.studentUid || "").trim() !== String(user.uid).trim()) {
+        return;
+      }
 
-      li.style.marginBottom = '15px';
+      found++;
 
-      li.innerHTML = `
-        <strong>
-          📝 ${data.title || 'Assignment'}
-        </strong>
+      const item = document.createElement("div");
+      item.className = "assignment-item";
 
-        <br>
+      item.innerHTML = `
+        <div style="
+          padding:15px;
+          margin-bottom:12px;
+          border:1px solid #ddd;
+          border-radius:10px;
+          background:#fff;
+        ">
+          <h4 style="margin:0 0 8px 0;">
+            📝 ${data.title || "Assignment"}
+          </h4>
 
-        <span>
-          ${data.description || 'No description provided.'}
-        </span>
+          <p style="margin:5px 0;">
+            ${data.description || "No description provided."}
+          </p>
 
-        <br>
-
-        <small>
-          📅 Due: ${data.dueDate || 'No due date'}
-        </small>
+          <p style="margin:5px 0;">
+            📅 Due Date:
+            <strong>${data.dueDate || "Not specified"}</strong>
+          </p>
+        </div>
       `;
 
-      assignmentsList.appendChild(li);
-
+      list.appendChild(item);
     });
 
+    if (found === 0) {
+      list.innerHTML = `
+        <div class="notice">
+          📭 No assignments found.
+          <br><br>
+          Student UID: ${user.uid}
+        </div>
+      `;
+    }
+
   } catch (error) {
+    console.error("ASSIGNMENTS ERROR:", error);
 
-    console.error(
-      'Error loading assignments:',
-      error
-    );
-
-    assignmentsList.innerHTML = `
-      <li>
-        ❌ Error loading assignments.
-        <br><br>
-        <small>${error.message}</small>
-      </li>
+    list.innerHTML = `
+      <div class="notice">
+        ❌ Unable to load assignments.
+        <br>
+        ${error.message}
+      </div>
     `;
-
   }
 }
-    
-  // ===============================
+
+ // ===============================
 // SHOW PORTAL / DASHBOARD
 // ===============================
 function showPortal(role) {

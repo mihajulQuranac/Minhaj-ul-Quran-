@@ -1065,9 +1065,11 @@ async function loadStudentAssignments(user) {
     const studentRef = db.collection("students").doc(uid);
 
     // Exact assignment document
-    const assignmentRef = studentRef
-      .collection("assignments")
-      .doc("gmXCva6bKqyjJRNWB3wM");
+    const assignmentRef = db
+  .collection("students")
+  .doc("1K67l24JLGPfBMFpKpEa1LzMBOE2")
+  .collection("assignments")
+  .doc("gmXCva6bKqyjJRNWB3wM");
 
     // Force fresh server read
     const studentSnap = await studentRef.get({

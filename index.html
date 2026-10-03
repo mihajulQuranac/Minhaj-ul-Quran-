@@ -1050,68 +1050,40 @@ async function loadStudentAssignments(user) {
 
   if (!list) return;
 
-  list.innerHTML = "🔄 Checking student assignment path...";
+  list.innerHTML = "🔍 Searching all assignments...";
 
   try {
     const uid = String(user.uid).trim();
 
-    console.log("LOGIN UID:", uid);
-
-    // Check student document
-    const studentDoc = await db
-      .collection("students")
-      .doc(uid)
+    const snapshot = await db
+      .collectionGroup("assignments")
       .get();
 
-    console.log("STUDENT EXISTS:", studentDoc.exists);
-
-    // Check assignments subcollection
-    const assignmentsSnapshot = await db
-      .collection("students")
-      .doc(uid)
-      .collection("assignments")
-      .get();
-
-    console.log(
-      "STUDENT ASSIGNMENTS COUNT:",
-      assignmentsSnapshot.size
-    );
+    console.log("ALL ASSIGNMENTS FOUND:", snapshot.size);
 
     let html = `
-      <div style="
-        padding:12px;
-        margin-bottom:12px;
-        background:#f5f5f5;
-        border-radius:8px;
-      ">
-        <strong>Assignment Connection Test</strong><br><br>
-
-        Student document:
-        ${studentDoc.exists ? "✅ Found" : "❌ Not Found"}
-        <br>
-
-        Student UID:
-        ${uid}
-        <br>
-
-        Assignments:
-        ${assignmentsSnapshot.size} found
+      <div style="padding:12px;background:#f5f5f5;border-radius:8px;">
+        <strong>Assignment Search Test</strong><br>
+        Student UID: ${uid}<br>
+        All assignments found: ${snapshot.size}
       </div>
+      <br>
     `;
 
-    if (assignmentsSnapshot.empty) {
-      html += `
-        <div class="notice">
-          ❌ Student assignments subcollection is empty.
-        </div>
-      `;
+    let matched = 0;
 
-      list.innerHTML = html;
-      return;
-    }
-
-    assignmentsSnapshot.forEach((doc) => {
+    snapshot.forEach((doc) => {
       const data = doc.data();
+
+      console.log("Assignment:", doc.id, data);
+
+      if (
+        String(data.studentUid || "").trim() !== uid
+      ) {
+        return;
+      }
+
+      matched++;
 
       html += `
         <div style="
@@ -1139,22 +1111,28 @@ async function loadStudentAssignments(user) {
       `;
     });
 
+    if (matched === 0) {
+      html += `
+        <div class="notice">
+          ❌ No assignment matched this Student UID.
+        </div>
+      `;
+    }
+
     list.innerHTML = html;
 
   } catch (error) {
-    console.error("ASSIGNMENT ERROR:", error);
+    console.error("ASSIGNMENT SEARCH ERROR:", error);
 
     list.innerHTML = `
       <div class="notice">
-        ❌ Firebase Error
-        <br><br>
-        ${error.message}
+        ❌ ${error.message}
       </div>
     `;
   }
 }
 
-// ===============================
+  // ===============================
 // SHOW PORTAL / DASHBOARD
 // ===============================
 function showPortal(role) {

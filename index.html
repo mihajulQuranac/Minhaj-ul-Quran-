@@ -1048,71 +1048,127 @@ async function loadStudentNotifications(user) {
 async function loadStudentAssignments(user) {
   const list = document.getElementById("studentAssignmentsList");
 
-  if (!list) return;
+  if (!list) {
+    console.log("studentAssignmentsList not found");
+    return;
+  }
 
-  list.innerHTML = "🔍 Testing new assignment...";
+  list.innerHTML = "🔍 Live Firebase test chal raha hai...";
 
   try {
     const uid = user.uid;
 
-    const ref = db
-      .collection("students")
-      .doc(uid)
+    // Live Firebase app information
+    const projectId = firebase.app().options.projectId;
+
+    // Exact student document
+    const studentRef = db.collection("students").doc(uid);
+
+    // Exact assignment document
+    const assignmentRef = studentRef
       .collection("assignments")
       .doc("gmXCva6bKqyjJRNWB3wM");
 
-    const doc = await ref.get();
+    // Force fresh server read
+    const studentSnap = await studentRef.get({
+      source: "server"
+    });
 
-    console.log("DOCUMENT EXISTS:", doc.exists);
-    console.log("DOCUMENT PATH:", ref.path);
-    console.log("DOCUMENT DATA:", doc.data());
+    const assignmentSnap = await assignmentRef.get({
+      source: "server"
+    });
 
-    if (doc.exists) {
-      const data = doc.data();
+    console.log("========== FIREBASE ASSIGNMENT TEST ==========");
+    console.log("Project ID:", projectId);
+    console.log("Logged-in UID:", uid);
+    console.log("Student path:", studentRef.path);
+    console.log("Assignment path:", assignmentRef.path);
+    console.log("Student exists:", studentSnap.exists);
+    console.log("Assignment exists:", assignmentSnap.exists);
+
+    if (assignmentSnap.exists) {
+      const data = assignmentSnap.data();
+
+      console.log("Assignment data:", data);
 
       list.innerHTML = `
         <div style="
           padding:15px;
-          border:1px solid #ddd;
-          border-radius:10px;
-          background:white;
+          border-radius:12px;
+          background:#f0fff4;
+          border:1px solid #b7ebc6;
+          line-height:1.8;
         ">
-          <h3>📝 ${data.title || "Assignment"}</h3>
+          <h3>📝 Assignment Found</h3>
 
-          <p>${data.description || "No description"}</p>
+          <strong>Title:</strong>
+          ${data.title || "No title"}<br>
 
-          <p>
-            📅 Due Date:
-            <strong>${data.dueDate || "Not specified"}</strong>
-          </p>
+          <strong>Description:</strong>
+          ${data.description || "No description"}<br>
 
-          <p>🆔 ${doc.id}</p>
+          <strong>Due Date:</strong>
+          ${data.dueDate || "No due date"}<br>
 
-          <p>✅ Firebase direct document found</p>
+          <hr>
+
+          <strong>Firebase Project:</strong>
+          ${projectId}<br>
+
+          <strong>Student UID:</strong>
+          ${uid}<br>
+
+          <strong>Status:</strong>
+          ✅ Firebase assignment found
         </div>
       `;
-    } else {
-      list.innerHTML = `
-        <div class="notice">
-          ❌ New assignment document NOT found.
-          <br><br>
-          Path checked:
-          <br>
-          ${ref.path}
-        </div>
-      `;
+
+      return;
     }
 
+    list.innerHTML = `
+      <div style="
+        padding:15px;
+        border-radius:12px;
+        background:#fff3f3;
+        border:1px solid #ffb3b3;
+        line-height:1.8;
+      ">
+        <h3>❌ Assignment Not Found</h3>
+
+        <strong>Firebase Project:</strong>
+        ${projectId}<br>
+
+        <strong>Student Document:</strong>
+        ${studentSnap.exists ? "✅ Found" : "❌ Not Found"}<br>
+
+        <strong>Assignment Document:</strong>
+        ❌ Not Found<br>
+
+        <strong>Exact Path Checked:</strong><br>
+        ${assignmentRef.path}
+      </div>
+    `;
+
   } catch (error) {
-    console.error("DIRECT TEST ERROR:", error);
+
+    console.error("ASSIGNMENT FIREBASE ERROR:", error);
 
     list.innerHTML = `
-      <div class="notice">
-        ❌ Firebase Error
-        <br><br>
-        Code: ${error.code || "unknown"}
-        <br>
-        ${error.message || ""}
+      <div style="
+        padding:15px;
+        border-radius:12px;
+        background:#fff3f3;
+        border:1px solid #ffb3b3;
+        line-height:1.8;
+      ">
+        <h3>🔥 Firebase Error</h3>
+
+        <strong>Code:</strong>
+        ${error.code || "Unknown"}<br>
+
+        <strong>Message:</strong>
+        ${error.message || error}
       </div>
     `;
   }

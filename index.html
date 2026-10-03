@@ -1050,72 +1050,103 @@ async function loadStudentAssignments(user) {
 
   if (!list) return;
 
-  list.innerHTML = "🔄 Loading assignments...";
+  list.innerHTML = "🔄 Checking student assignment path...";
 
   try {
-    console.log("Checking student assignments...");
-    console.log("Student UID:", user.uid);
+    const uid = String(user.uid).trim();
 
-    const snapshot = await db
+    console.log("LOGIN UID:", uid);
+
+    // Check student document
+    const studentDoc = await db
       .collection("students")
-      .doc(user.uid)
+      .doc(uid)
+      .get();
+
+    console.log("STUDENT EXISTS:", studentDoc.exists);
+
+    // Check assignments subcollection
+    const assignmentsSnapshot = await db
+      .collection("students")
+      .doc(uid)
       .collection("assignments")
       .get();
 
-    console.log("ASSIGNMENTS COUNT:", snapshot.size);
+    console.log(
+      "STUDENT ASSIGNMENTS COUNT:",
+      assignmentsSnapshot.size
+    );
 
-    if (snapshot.empty) {
-      list.innerHTML = `
+    let html = `
+      <div style="
+        padding:12px;
+        margin-bottom:12px;
+        background:#f5f5f5;
+        border-radius:8px;
+      ">
+        <strong>Assignment Connection Test</strong><br><br>
+
+        Student document:
+        ${studentDoc.exists ? "✅ Found" : "❌ Not Found"}
+        <br>
+
+        Student UID:
+        ${uid}
+        <br>
+
+        Assignments:
+        ${assignmentsSnapshot.size} found
+      </div>
+    `;
+
+    if (assignmentsSnapshot.empty) {
+      html += `
         <div class="notice">
-          📭 No assignments found.
-          <br><br>
-          Student UID: ${user.uid}
+          ❌ Student assignments subcollection is empty.
         </div>
       `;
+
+      list.innerHTML = html;
       return;
     }
 
-    list.innerHTML = "";
-
-    snapshot.forEach((doc) => {
+    assignmentsSnapshot.forEach((doc) => {
       const data = doc.data();
 
-      console.log("Assignment:", doc.id, data);
+      html += `
+        <div style="
+          padding:15px;
+          margin-bottom:12px;
+          border:1px solid #ddd;
+          border-radius:10px;
+          background:white;
+        ">
+          <h4>📝 ${data.title || "Assignment"}</h4>
 
-      const item = document.createElement("div");
+          <p>
+            ${data.description || "No description"}
+          </p>
 
-      item.style.cssText = `
-        padding:15px;
-        margin-bottom:12px;
-        border:1px solid #ddd;
-        border-radius:10px;
-        background:#fff;
+          <p>
+            📅 Due Date:
+            ${data.dueDate || "Not specified"}
+          </p>
+
+          <small>
+            Document ID: ${doc.id}
+          </small>
+        </div>
       `;
-
-      item.innerHTML = `
-        <h4 style="margin:0 0 8px 0;">
-          📝 ${data.title || "Assignment"}
-        </h4>
-
-        <p style="margin:5px 0;">
-          ${data.description || "No description provided."}
-        </p>
-
-        <p style="margin:5px 0;">
-          📅 Due Date:
-          <strong>${data.dueDate || "Not specified"}</strong>
-        </p>
-      `;
-
-      list.appendChild(item);
     });
 
+    list.innerHTML = html;
+
   } catch (error) {
-    console.error("ASSIGNMENTS ERROR:", error);
+    console.error("ASSIGNMENT ERROR:", error);
 
     list.innerHTML = `
       <div class="notice">
-        ❌ Error loading assignments.
+        ❌ Firebase Error
         <br><br>
         ${error.message}
       </div>
@@ -1123,7 +1154,7 @@ async function loadStudentAssignments(user) {
   }
 }
 
- // ===============================
+// ===============================
 // SHOW PORTAL / DASHBOARD
 // ===============================
 function showPortal(role) {

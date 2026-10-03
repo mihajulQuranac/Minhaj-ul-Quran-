@@ -1045,34 +1045,31 @@ async function loadStudentNotifications(user) {
      // ===============================
 // LOAD STUDENT ASSIGNMENTS FROM FIRESTORE
 // ===============================
-async function loadStudentAssignments(user) {
+ async function loadStudentAssignments(user) {
   const list = document.getElementById("studentAssignmentsList");
 
-  if (!list) {
-    console.log("studentAssignmentsList not found");
-    return;
-  }
-
-  list.innerHTML = "🔍 Live Firebase test chal raha hai...";
+  if (!list) return;
 
   try {
     const uid = user.uid;
 
-    // Live Firebase app information
-    const projectId = firebase.app().options.projectId;
+    const assignmentId = "gmXCva6bKqyjJRNWB3wM";
 
-    // Exact student document
-    const studentRef = db.collection("students").doc(uid);
+    const studentRef = db
+      .collection("students")
+      .doc(uid);
 
-    // Exact assignment document
-    const assignmentRef = db
-  .collection("students")
-  .doc("1K67l24JLGPfBMFpKpEa1LzMBOE2")
-  .collection("assignments")
-  .doc("gmXCva6bKqyjJRNWB3wM");
+    const assignmentsRef = studentRef
+      .collection("assignments");
 
-    // Force fresh server read
+    const assignmentRef = assignmentsRef
+      .doc(assignmentId);
+
     const studentSnap = await studentRef.get({
+      source: "server"
+    });
+
+    const assignmentsSnap = await assignmentsRef.get({
       source: "server"
     });
 
@@ -1080,101 +1077,93 @@ async function loadStudentAssignments(user) {
       source: "server"
     });
 
-    console.log("========== FIREBASE ASSIGNMENT TEST ==========");
-    console.log("Project ID:", projectId);
-    console.log("Logged-in UID:", uid);
+    console.log("========== ASSIGNMENT DEBUG ==========");
+    console.log("Project:", firebase.app().options.projectId);
+    console.log("UID:", uid);
     console.log("Student path:", studentRef.path);
+    console.log("Assignments path:", assignmentsRef.path);
     console.log("Assignment path:", assignmentRef.path);
     console.log("Student exists:", studentSnap.exists);
-    console.log("Assignment exists:", assignmentSnap.exists);
+    console.log("Assignments count:", assignmentsSnap.size);
+    console.log("Target assignment exists:", assignmentSnap.exists);
 
-    if (assignmentSnap.exists) {
-      const data = assignmentSnap.data();
+    let allDocs = "";
 
-      console.log("Assignment data:", data);
-
-      list.innerHTML = `
-        <div style="
-          padding:15px;
-          border-radius:12px;
-          background:#f0fff4;
-          border:1px solid #b7ebc6;
-          line-height:1.8;
-        ">
-          <h3>📝 Assignment Found</h3>
-
-          <strong>Title:</strong>
-          ${data.title || "No title"}<br>
-
-          <strong>Description:</strong>
-          ${data.description || "No description"}<br>
-
-          <strong>Due Date:</strong>
-          ${data.dueDate || "No due date"}<br>
-
-          <hr>
-
-          <strong>Firebase Project:</strong>
-          ${projectId}<br>
-
-          <strong>Student UID:</strong>
-          ${uid}<br>
-
-          <strong>Status:</strong>
-          ✅ Firebase assignment found
+    assignmentsSnap.forEach(doc => {
+      allDocs += `
+        <div style="margin-top:8px;">
+          📄 Document ID: <strong>${doc.id}</strong>
         </div>
       `;
-
-      return;
-    }
+    });
 
     list.innerHTML = `
       <div style="
         padding:15px;
-        border-radius:12px;
-        background:#fff3f3;
-        border:1px solid #ffb3b3;
         line-height:1.8;
+        border:1px solid #ddd;
+        border-radius:12px;
       ">
-        <h3>❌ Assignment Not Found</h3>
 
-        <strong>Firebase Project:</strong>
-        ${projectId}<br>
+        <h3>🔍 Firebase Assignment Debug</h3>
 
-        <strong>Student Document:</strong>
-        ${studentSnap.exists ? "✅ Found" : "❌ Not Found"}<br>
+        <strong>Project:</strong><br>
+        ${firebase.app().options.projectId}
 
-        <strong>Assignment Document:</strong>
-        ❌ Not Found<br>
+        <br><br>
 
-        <strong>Exact Path Checked:</strong><br>
+        <strong>Student UID:</strong><br>
+        ${uid}
+
+        <br><br>
+
+        <strong>Student Path:</strong><br>
+        ${studentRef.path}
+
+        <br><br>
+
+        <strong>Assignments Path:</strong><br>
+        ${assignmentsRef.path}
+
+        <br><br>
+
+        <strong>Exact Assignment Path:</strong><br>
         ${assignmentRef.path}
+
+        <br><br>
+
+        <strong>Student:</strong>
+        ${studentSnap.exists ? "✅ Found" : "❌ Not Found"}
+
+        <br>
+
+        <strong>Assignments Found:</strong>
+        ${assignmentsSnap.size}
+
+        <br>
+
+        <strong>Target Assignment:</strong>
+        ${assignmentSnap.exists ? "✅ Found" : "❌ Not Found"}
+
+        ${allDocs}
+
       </div>
     `;
 
   } catch (error) {
 
-    console.error("ASSIGNMENT FIREBASE ERROR:", error);
+    console.error("ASSIGNMENT ERROR:", error);
 
     list.innerHTML = `
-      <div style="
-        padding:15px;
-        border-radius:12px;
-        background:#fff3f3;
-        border:1px solid #ffb3b3;
-        line-height:1.8;
-      ">
+      <div style="padding:15px;">
         <h3>🔥 Firebase Error</h3>
-
-        <strong>Code:</strong>
-        ${error.code || "Unknown"}<br>
-
-        <strong>Message:</strong>
-        ${error.message || error}
+        <strong>Code:</strong> ${error.code || "Unknown"}<br>
+        <strong>Message:</strong> ${error.message || error}
       </div>
     `;
   }
 }
+        
 
   // ===============================
 // SHOW PORTAL / DASHBOARD

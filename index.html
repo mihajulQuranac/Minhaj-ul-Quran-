@@ -1050,83 +1050,70 @@ async function loadStudentAssignments(user) {
 
   if (!list) return;
 
-  list.innerHTML = "🔄 Loading assignments...";
+  list.innerHTML = "🔄 Checking Firebase assignments...";
 
   try {
-    console.log("ASSIGNMENTS: Checking root collection");
-    console.log("Student UID:", user.uid);
-
     const snapshot = await db.collection("assignments").get();
 
-    console.log("ASSIGNMENTS COUNT:", snapshot.size);
+    let html = `
+      <div style="padding:10px;background:#f5f5f5;border-radius:8px;">
+        <strong>Firebase Assignment Test</strong><br>
+        Student UID: ${user.uid}<br>
+        Documents found: ${snapshot.size}
+      </div>
+      <br>
+    `;
 
-    let found = 0;
-    list.innerHTML = "";
+    if (snapshot.empty) {
+      html += "❌ Root assignments collection is empty.";
+    } else {
+      snapshot.forEach((doc) => {
+        const data = doc.data();
 
-    snapshot.forEach((doc) => {
-      const data = doc.data();
+        html += `
+          <div style="
+            padding:15px;
+            margin:10px 0;
+            border:1px solid #ccc;
+            border-radius:10px;
+            background:white;
+          ">
+            <strong>Document ID:</strong> ${doc.id}<br><br>
 
-      console.log("Assignment:", doc.id, data);
+            <strong>Title:</strong>
+            ${data.title || "MISSING"}<br>
 
-      // Sirf isi student ke assignments
-      if (String(data.studentUid || "").trim() !== String(user.uid).trim()) {
-        return;
-      }
+            <strong>Student UID:</strong>
+            ${data.studentUid || "MISSING"}<br>
 
-      found++;
+            <strong>Current Student UID:</strong>
+            ${user.uid}<br><br>
 
-      const item = document.createElement("div");
-      item.className = "assignment-item";
-
-      item.innerHTML = `
-        <div style="
-          padding:15px;
-          margin-bottom:12px;
-          border:1px solid #ddd;
-          border-radius:10px;
-          background:#fff;
-        ">
-          <h4 style="margin:0 0 8px 0;">
-            📝 ${data.title || "Assignment"}
-          </h4>
-
-          <p style="margin:5px 0;">
-            ${data.description || "No description provided."}
-          </p>
-
-          <p style="margin:5px 0;">
-            📅 Due Date:
-            <strong>${data.dueDate || "Not specified"}</strong>
-          </p>
-        </div>
-      `;
-
-      list.appendChild(item);
-    });
-
-    if (found === 0) {
-      list.innerHTML = `
-        <div class="notice">
-          📭 No assignments found.
-          <br><br>
-          Student UID: ${user.uid}
-        </div>
-      `;
+            <strong>Match:</strong>
+            ${
+              String(data.studentUid || "").trim() ===
+              String(user.uid || "").trim()
+                ? "✅ YES"
+                : "❌ NO"
+            }
+          </div>
+        `;
+      });
     }
 
+    list.innerHTML = html;
+
   } catch (error) {
-    console.error("ASSIGNMENTS ERROR:", error);
+    console.error(error);
 
     list.innerHTML = `
-      <div class="notice">
-        ❌ Unable to load assignments.
-        <br>
-        ${error.message}
-      </div>
+      ❌ Firebase Error:
+      <br>
+      ${error.message}
     `;
   }
 }
-
+          
  // ===============================
 // SHOW PORTAL / DASHBOARD
 // ===============================

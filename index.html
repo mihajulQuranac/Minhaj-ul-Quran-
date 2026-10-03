@@ -1050,75 +1050,109 @@ async function loadStudentAssignments(user) {
 
   if (!list) return;
 
-  list.innerHTML = "🔍 Direct assignment test...";
+  list.innerHTML = "🔍 Finding assignment location...";
 
   try {
     const uid = user.uid;
 
-    const ref = db
+    // 1. Check root assignments
+    const root = await db.collection("assignments").get();
+
+    // 2. Check student's assignments
+    const studentAssignments = await db
       .collection("students")
       .doc(uid)
       .collection("assignments")
-      .doc("9Krm8BMUqNDQOmq7DCFB");
+      .get();
 
-    const doc = await ref.get();
+    // 3. Check all assignment subcollections
+    const group = await db.collectionGroup("assignments").get();
 
-    console.log("DIRECT ASSIGNMENT EXISTS:", doc.exists);
-    console.log("DIRECT ASSIGNMENT DATA:", doc.data());
-
-    if (!doc.exists) {
-      list.innerHTML = `
-        <div class="notice">
-          ❌ Direct document not found.
-          <br><br>
-          Path checked:
-          <br>
-          students/${uid}/assignments/9Krm8BMUqNDQOmq7DCFB
-        </div>
-      `;
-      return;
-    }
-
-    const data = doc.data();
-
-    list.innerHTML = `
+    let output = `
       <div style="
         padding:15px;
-        border:1px solid #ddd;
+        background:#f5f5f5;
         border-radius:10px;
-        background:white;
+        line-height:1.7;
       ">
-        <h3>📝 ${data.title || "Assignment"}</h3>
+        <strong>🔍 Firebase Assignment Location Test</strong>
+        <br><br>
 
-        <p>
-          ${data.description || "No description"}
-        </p>
+        Root assignments: ${root.size}
+        <br>
 
-        <p>
-          📅 Due Date:
-          <strong>${data.dueDate || "Not specified"}</strong>
-        </p>
+        Student assignments: ${studentAssignments.size}
+        <br>
 
-        <p>
-          🆔 ${doc.id}
-        </p>
+        All assignment subcollections: ${group.size}
       </div>
+      <br>
     `;
 
+    // Show root documents
+    if (root.size > 0) {
+      output += "<strong>ROOT DOCUMENTS:</strong>";
+
+      root.forEach(doc => {
+        output += `
+          <div style="padding:10px;border-bottom:1px solid #ddd;">
+            ID: ${doc.id}<br>
+            Title: ${doc.data().title || "No title"}
+          </div>
+        `;
+      });
+    }
+
+    // Show collectionGroup documents
+    if (group.size > 0) {
+      output += "<br><strong>COLLECTION GROUP DOCUMENTS:</strong>";
+
+      group.forEach(doc => {
+        const data = doc.data();
+
+        output += `
+          <div style="
+            padding:10px;
+            margin-top:8px;
+            border:1px solid #ddd;
+            border-radius:8px;
+          ">
+            ID: ${doc.id}<br>
+            Title: ${data.title || "No title"}<br>
+            Student UID: ${data.studentUid || "Missing"}<br>
+            Path: ${doc.ref.path}
+          </div>
+        `;
+      });
+    }
+
+    if (
+      root.size === 0 &&
+      studentAssignments.size === 0 &&
+      group.size === 0
+    ) {
+      output += `
+        <div class="notice">
+          ❌ Firebase SDK cannot see the assignment anywhere.
+        </div>
+      `;
+    }
+
+    list.innerHTML = output;
+
   } catch (error) {
-    console.error("DIRECT ASSIGNMENT ERROR:", error);
+    console.error(error);
 
     list.innerHTML = `
       <div class="notice">
-        ❌ Firebase Error
-        <br><br>
-        ${error.code || ""}
+        ❌ ${error.code || "Error"}
         <br>
-        ${error.message || ""}
+        ${error.message}
       </div>
     `;
   }
 }
+
 
  // ===============================
 // SHOW PORTAL / DASHBOARD

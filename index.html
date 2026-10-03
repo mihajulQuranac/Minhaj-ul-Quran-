@@ -1042,208 +1042,120 @@ async function loadStudentNotifications(user) {
     `;
   }
 }
-     // ===============================
-// LOAD STUDENT ASSIGNMENTS FROM FIRESTORE
+  // ===============================
+// LOAD STUDENT ASSIGNMENTS
 // ===============================
- async function loadStudentAssignments(user) {
+async function loadStudentAssignments(user) {
   const list = document.getElementById("studentAssignmentsList");
 
-  if (!list) return;
+  if (!list || !user) return;
 
-  list.innerHTML = "🔍 Firebase final test...";
+  list.innerHTML = `
+    <li>🔄 Loading assignments...</li>
+  `;
 
   try {
     const uid = user.uid;
-    const assignmentId = "gmXCva6bKqyjJRNWB3wM";
 
-    // Student path
-    const studentRef = db
+    // Student's assignments collection
+    const assignmentsRef = db
       .collection("students")
-      .doc(uid);
-
-    // Student assignments path
-    const studentAssignmentsRef = studentRef
+      .doc(uid)
       .collection("assignments");
 
-    // Exact assignment
-    const exactAssignmentRef = studentAssignmentsRef
-      .doc(assignmentId);
-
-    // Root assignments collection
-    const rootAssignmentsRef = db
-      .collection("assignments");
-
-    // Force fresh server reads
-    const studentSnap = await studentRef.get({
+    const snapshot = await assignmentsRef.get({
       source: "server"
     });
 
-    const studentAssignmentsSnap =
-      await studentAssignmentsRef.get({
-        source: "server"
+    console.log("ASSIGNMENTS PATH:", assignmentsRef.path);
+    console.log("ASSIGNMENTS COUNT:", snapshot.size);
+
+    if (snapshot.empty) {
+      list.innerHTML = `
+        <li>
+          📭 No assignments found.
+        </li>
+      `;
+      return;
+    }
+
+    list.innerHTML = "";
+
+    snapshot.forEach((doc) => {
+      const rawData = doc.data();
+
+      // Field names ke extra spaces handle karein
+      const data = {};
+
+      Object.keys(rawData).forEach((key) => {
+        data[key.trim()] = rawData[key];
       });
 
-    const exactAssignmentSnap =
-      await exactAssignmentRef.get({
-        source: "server"
-      });
+      const title =
+        data.title ||
+        data.Title ||
+        "Assignment";
 
-    const rootAssignmentsSnap =
-      await rootAssignmentsRef.get({
-        source: "server"
-      });
+      const description =
+        data.description ||
+        data.Description ||
+        "No description provided.";
 
-    console.log("========== FINAL FIREBASE TEST ==========");
-    console.log("Project:", firebase.app().options.projectId);
-    console.log("UID:", uid);
+      const dueDate =
+        data.dueDate ||
+        data.DueDate ||
+        "No due date";
 
-    console.log(
-      "Student path:",
-      studentRef.path
-    );
+      const li = document.createElement("li");
 
-    console.log(
-      "Student assignments path:",
-      studentAssignmentsRef.path
-    );
+      li.innerHTML = `
+        <div style="
+          padding:16px;
+          margin-bottom:12px;
+          border:1px solid #ddd;
+          border-radius:12px;
+          background:#fff;
+        ">
+          <strong style="font-size:17px;">
+            📝 ${title}
+          </strong>
 
-    console.log(
-      "Exact assignment path:",
-      exactAssignmentRef.path
-    );
+          <br><br>
 
-    console.log(
-      "Student exists:",
-      studentSnap.exists
-    );
+          <span>
+            ${description}
+          </span>
 
-    console.log(
-      "Student assignments:",
-      studentAssignmentsSnap.size
-    );
+          <br><br>
 
-    console.log(
-      "Exact assignment:",
-      exactAssignmentSnap.exists
-    );
-
-    console.log(
-      "Root assignments:",
-      rootAssignmentsSnap.size
-    );
-
-    // Documents inside student assignments
-    let studentDocs = "";
-
-    studentAssignmentsSnap.forEach(doc => {
-      studentDocs += `
-        <div>
-          📄 ${doc.id}
+          <strong>
+            📅 Due Date:
+          </strong>
+          ${dueDate}
         </div>
       `;
+
+      list.appendChild(li);
     });
-
-    // Documents inside root assignments
-    let rootDocs = "";
-
-    rootAssignmentsSnap.forEach(doc => {
-      rootDocs += `
-        <div>
-          📄 ${doc.id}
-        </div>
-      `;
-    });
-
-    list.innerHTML = `
-      <div style="
-        padding:16px;
-        border:1px solid #ddd;
-        border-radius:12px;
-        line-height:1.8;
-      ">
-
-        <h3>🔍 Final Firebase Test</h3>
-
-        <strong>Project:</strong><br>
-        ${firebase.app().options.projectId}
-
-        <br><br>
-
-        <strong>Student UID:</strong><br>
-        ${uid}
-
-        <br><br>
-
-        <strong>Student Document:</strong>
-        ${studentSnap.exists ? "✅ Found" : "❌ Not Found"}
-
-        <br>
-
-        <strong>Student Assignments:</strong>
-        ${studentAssignmentsSnap.size}
-
-        <br>
-
-        <strong>Exact Assignment:</strong>
-        ${exactAssignmentSnap.exists ? "✅ Found" : "❌ Not Found"}
-
-        <br>
-
-        <strong>Root Assignments:</strong>
-        ${rootAssignmentsSnap.size}
-
-        <hr>
-
-        <strong>Student Assignments Path:</strong><br>
-        ${studentAssignmentsRef.path}
-
-        <br><br>
-
-        <strong>Exact Assignment Path:</strong><br>
-        ${exactAssignmentRef.path}
-
-        <hr>
-
-        <strong>Student Assignment Documents:</strong>
-        ${studentDocs || "📭 None"}
-
-        <br><br>
-
-        <strong>Root Assignment Documents:</strong>
-        ${rootDocs || "📭 None"}
-
-      </div>
-    `;
 
   } catch (error) {
 
     console.error(
-      "FINAL FIREBASE ERROR:",
+      "Assignment Error:",
       error
     );
 
     list.innerHTML = `
-      <div style="
-        padding:16px;
-        border:1px solid #ffaaaa;
-        border-radius:12px;
-      ">
-
-        <h3>🔥 Firebase Error</h3>
-
-        <strong>Code:</strong>
-        ${error.code || "Unknown"}
-
-        <br>
-
-        <strong>Message:</strong>
-        ${error.message || error}
-
-      </div>
+      <li>
+        ❌ Failed to load assignments.
+        <br><br>
+        <small>
+          ${error.message}
+        </small>
+      </li>
     `;
   }
-}
-        
+}   
 
   // ===============================
 // SHOW PORTAL / DASHBOARD
